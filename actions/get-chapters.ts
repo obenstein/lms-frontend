@@ -18,12 +18,13 @@ export const getChapters = async ({
     ).data;
     const chapters: {
       _id: string;
-      title:string,
+      title: string;
       position: string;
       isFree: boolean;
       playbackId: string;
-      description: string
-      isCompleted: {[key:string]: boolean}
+      description: string;
+      isCompleted: { [key: string]: boolean };
+      attachments: string[];
     }[] = (await axios.get(`${process.env.BACK_END_URL}/api/chapters/${courseId}/published`))
       .data;
 
@@ -37,22 +38,22 @@ export const getChapters = async ({
       throw new Error("Course or Chapters is not found!");
     }
 
-    const purchased = course.purchased[userId];
+    const purchased = true; // TODO: Implement purchase check logic
     const isCompleted = chapter.isCompleted[userId]
 
     let muxData = null;
     let nextChapter: {_id: string} | null = null;
     let attachments: string[] = [];
 
-    if (purchased) {
-      attachments = course.attachments;
-    }
+    
+      attachments = chapter.attachments;
+    
 
     if (chapter.isFree || purchased) {
       muxData = chapter.playbackId;
       nextChapter = chapters[chapters.indexOf(chapter) + 1] || null;
     }
-
+  
 
     return{
         course,

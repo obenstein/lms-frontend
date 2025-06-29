@@ -28,7 +28,7 @@ export const CourseCard = ({
   chaptersLength,
 }: courseCardProps) => {
   return (
-    <Link href={`/courses/${_id}`}>
+    <Link href={`/courses/${_id}/overview`}>
       <div className="group hover:shadow-sm transition overflow-hidden border rounded-lg p-3 h-full">
         <div className="relative w-full aspect-video rounded-md overflow-hidden">
           <Image fill className="object-cover" alt={title} src={imageUrl} />
@@ -56,7 +56,7 @@ export const CourseCard = ({
               />
             ) : (
               <p className="text-md md:text-sm text-end font-medium">
-                {formatPrice(price)}
+                {/* {formatPrice(price)} */}
               </p>
             )}
           </div>

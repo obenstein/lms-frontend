@@ -1,6 +1,6 @@
 "use client"
 
-import {Compass, Layout,List, BarChart} from "lucide-react"
+import {Compass, Layout,List, BarChart, BookOpen} from "lucide-react"
 import SidebarItem from "./sidebar-item";
 import { usePathname } from "next/navigation";
 
@@ -11,8 +11,8 @@ const guestRoutes = [
         href: "/"
     },
     {
-        icon: Compass,
-        label: "Browse",
+        icon: BookOpen,
+        label: "My Courses",
         href: "/search"
     }
 ]

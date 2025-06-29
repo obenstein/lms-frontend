@@ -15,7 +15,7 @@ const handleAuth = async () => {
 export const ourFileRouter = {
   courseImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(() => handleAuth())
-    .onUploadComplete(({metadata,file}) => {console.log(file.url)}),
+    .onUploadComplete(({metadata,file}) => {console.log(file.ufsUrl)}),
 
   courseAttachment: f(["image","video","text","pdf","audio"])
   .middleware(() => handleAuth())

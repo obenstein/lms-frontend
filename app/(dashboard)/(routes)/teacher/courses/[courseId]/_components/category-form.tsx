@@ -28,14 +28,14 @@ interface categoryFormProps {
     categoryId: string;
   };
   courseId: string;
-  options: {label: string, value: string}[]
+  options: { label: string; value: string }[];
 }
 
 const formSchema = z.object({
   categoryId: z.string().min(1, { message: "Course category is required" }),
 });
 
-const CategoryForm = ({ intialData, courseId,options }: categoryFormProps) => {
+const CategoryForm = ({ intialData, courseId, options }: categoryFormProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -48,6 +48,8 @@ const CategoryForm = ({ intialData, courseId,options }: categoryFormProps) => {
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+
+    // console.log("cors", courseId);
     try {
       const res = await axios.patch(`/api/courses/${courseId}`, values);
       toast.success("successfully updataed");
@@ -58,7 +60,9 @@ const CategoryForm = ({ intialData, courseId,options }: categoryFormProps) => {
     }
   };
 
-  const selectedOption = options.find((option) => option.value === intialData.categoryId)
+  const selectedOption = options.find(
+    (option) => option.value === intialData.categoryId
+  );
 
   return (
     <div className="mt-6 bg-slate-100 border rounded-md p-4">
@@ -75,7 +79,16 @@ const CategoryForm = ({ intialData, courseId,options }: categoryFormProps) => {
           )}
         </Button>
       </div>
-      {!isEditing && <p className={cn("mt-2 text-sm", !intialData.categoryId && "text-slate-500 italic")}>{selectedOption?.label || "No Categories"}</p>}
+      {!isEditing && (
+        <p
+          className={cn(
+            "mt-2 text-sm",
+            !intialData.categoryId && "text-slate-500 italic"
+          )}
+        >
+          {selectedOption?.label || "No Categories"}
+        </p>
+      )}
       {isEditing && (
         <Form {...form}>
           <form
@@ -91,8 +104,12 @@ const CategoryForm = ({ intialData, courseId,options }: categoryFormProps) => {
                     <FormLabel className="text-sm text-slate-600 mr-3">
                       Select category
                     </FormLabel>
-                    <FormControl >   
-                      <Combobox options={options} {...field}/>
+                    <FormControl>
+                      <Combobox
+                        options={options}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                     <FormDescription className="mt-2">
                       <FormMessage />

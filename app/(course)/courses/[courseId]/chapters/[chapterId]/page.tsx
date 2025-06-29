@@ -9,24 +9,28 @@ import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
 
-interface PageProps {
-  params: Promise<{ courseId: string; chapterId: string }>;
-}
 
-const ChapterIdPage = async ({ params }: PageProps) => {
+export default async function ChapterIdPage({
+  params,
+}: {
+  params: { courseId: string; chapterId: string };
+}) {
+  // Await params before using
+  
   const { userId } = await auth();
   if (!userId) {
     return redirect("/");
   }
-
-  // Await the params object
   const { courseId, chapterId } = await params;
+  console.log({chapterId})
+  // Await the params object
+  // const { courseId, chapterId } = params;
 
   const {
     course,
     chapter,
     attachments,
-    purchased,
+    purchased,  
     muxData,
     nextChapter,
     isCompleted,
@@ -35,14 +39,14 @@ const ChapterIdPage = async ({ params }: PageProps) => {
     courseId: courseId,
     chapterId: chapterId,
   });
-
+  
   if (!course || !chapter) {
     return redirect("/");
   }
 
   const isLocked = !chapter.isFree && !purchased;
   const completeOnEnd = !!purchased && isCompleted;
-  
+  // console.log("attachments", attachments);
   return (
     <div>
       {isCompleted && (
@@ -117,4 +121,4 @@ const ChapterIdPage = async ({ params }: PageProps) => {
   );
 };
 
-export default ChapterIdPage;
+// export default ChapterIdPage;

@@ -2,7 +2,8 @@
 import { redirect } from "next/navigation";
 
 const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
-  const courseId = await params.courseId; 
+  // Await params before using
+  const { courseId } = await params;
 
   const res = await fetch(
     `${process.env.BACK_END_URL}/api/chapters/${courseId}/published`,
@@ -15,7 +16,8 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
     redirect("/");
   }
 
-  redirect(`/courses/${courseId}/chapters/${courseChapters[0]._id}`);
+    redirect(`/courses/${courseId}/overview`);
+
 };
 
 export default CourseIdPage;

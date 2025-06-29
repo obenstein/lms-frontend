@@ -1,5 +1,3 @@
-// "use client"
-
 import { IconBadge } from "@/components/icon-bage";
 import { auth } from "@clerk/nextjs/server";
 import { CircleDollarSign, File, LayoutDashboard, ListChecks } from "lucide-react";
@@ -9,140 +7,177 @@ import TitleForm from "./_components/title-form";
 import DescriptionForm from "./_components/description-form";
 import ImageForm from "./_components/image-form";
 import CategoryForm from "./_components/category-form";
-import PriceForm  from "./_components/price-form";
+import PriceForm from "./_components/price-form";
 import AttachmentsForm from "./_components/attachments-form";
 import ChapterForm from "./_components/chpater-form";
 import { Banner } from "@/components/banner";
 import { Actions } from "./_components/actions";
 
-export default async function CourseIdPage({ params }: { params: { courseId: string } }) {
+interface ChapterType {
+  title: string;
+  _id: string;
+  isPublished: boolean;
+  position: number;
+  isFree: string;
+}
+
+interface CourseType {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  categoryId: string;
+  userId: string;
+  isPublished: boolean;
+  attachments: string[];
+}
+
+interface CategoryType {
+  name: string;
+  _id: string;
+}
+
+export default async function CourseIdPage({
+  params,
+}: {
+  params: { courseId: string };
+}) {
+  // Await the params - this is the key fix for Next.js 15+
+  const { courseId } = await params;
+  
   const { userId } = await auth();
+  if (!userId) redirect("/");
 
-  if (!userId) {  
-    redirect("/");
-  }
+  try {
+    // Fetch course data
+    const courseRes = await fetch(`${process.env.BACK_END_URL}/api/courses/${courseId}`);
+    if (!courseRes.ok) {
+      console.error(`Course fetch failed: ${courseRes.status}`);
+      redirect("/");
+    }
+    const course: CourseType = await courseRes.json();
 
-  const courseRes = await fetch( `${process.env.BACK_END_URL}/api/courses/${params.courseId}`);
-  const course = await courseRes.json();
+    // Fetch categories
+    const categoryRes = await fetch(`${process.env.BACK_END_URL}/api/category`);
+    if (!categoryRes.ok) {
+      console.error(`Categories fetch failed: ${categoryRes.status}`);
+      redirect("/");
+    }
+    const categories: CategoryType[] = await categoryRes.json();
 
-  const categoryRes = await fetch( `${process.env.BACK_END_URL}/api/category`)
-  const categories = await categoryRes.json()
+    // Fetch course chapters - using the correct endpoint from your code
+    const courseChaptersRes = await fetch(`${process.env.BACK_END_URL}/api/chapters/${courseId}`);
+    let courseChapters: ChapterType[] = [];
     
+    if (courseChaptersRes.ok) {
+      courseChapters = await courseChaptersRes.json();
+    } else {
+      console.warn(`Chapters fetch failed: ${courseChaptersRes.status}`);
+      // Continue with empty chapters array instead of failing
+    }
 
+    // Validation checks
+    if (!course) {
+      redirect("/");
+    }
 
-  
-  // interface chapterType{
-  //   title: string,
-  //   isPublished: Boolean,
-  //   _id: string,
-  //   position: number
-  // }
+    if (course.userId !== userId) {
+      redirect("/");
+    }
 
-  const courseChaptersRes = await fetch( `${process.env.BACK_END_URL}/api/chapters/${params.courseId}`);
-  const courseChapters :{title: string, _id: string, isPublished: boolean, position: number, isFree: string}[]= await courseChaptersRes.json()
+    const publishedChapters = courseChapters.some((chapter) => chapter.isPublished);
 
-  // courseChapters.sort((a,b) => a.position - b.position)
-  
-  const publishedChapters = courseChapters.some((chapter) => chapter.isPublished)
+    const requiredFields = [
+      course.title,
+      course.description,
+      course.imageUrl,
+      course.price,
+      course.categoryId,
+      publishedChapters
+    ];
 
+    const totalFields = requiredFields.length;
+    const completedFields = requiredFields.filter(Boolean).length;
+    const completionText = `${completedFields}/${totalFields}`;
 
-  if (!course) {
+    const isComplete = requiredFields.every(Boolean);
+
+    return (
+      <>
+        {!course.isPublished && (
+          <Banner label="The course is not published. It will not be visible to the students!" />
+        )}
+        {course.isPublished && (
+          <Banner label="The course is Published. It is visible to the students." variant="success" />
+        )}
+        <div className="p-6">
+          <div className="flex items-center justify-between bg-green-200 rounded-lg p-6">
+            <div className="flex flex-col gap-y-2">
+              <h1 className="text-2xl font-semibold">Course Setup</h1>
+              <span className="text-sm text-slate-700">
+                Complete all fields {completionText}
+              </span>
+            </div>
+            <Actions 
+              disabled={!isComplete}
+              courseId={course._id}
+              isPublished={course.isPublished}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+            <div>
+              <div className="flex items-center gap-x-2">
+                <IconBadge icon={LayoutDashboard} />
+                <h2 className="text-xl font-medium">Customize your course</h2>
+              </div>
+              <TitleForm intialData={course} courseId={course._id} />
+              <DescriptionForm intialData={course} courseId={course._id} />
+              <ImageForm intialData={course} courseId={course._id} />
+              <CategoryForm 
+                intialData={course} 
+                courseId={course._id} 
+                options={categories.map((category) => ({
+                  label: category.name, 
+                  value: category._id
+                }))} 
+              />
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <div className="flex items-center gap-x-2">
+                  <IconBadge icon={ListChecks} />
+                  <h2 className="text-xl font-medium">
+                    Course Chapters
+                  </h2>
+                </div>
+                <ChapterForm courseChapters={courseChapters} courseId={course._id} />
+              </div>
+
+              <div>
+                <div className="flex items-center gap-x-2">
+                  <IconBadge icon={CircleDollarSign} />
+                  <h2 className="text-xl font-medium">Price</h2>
+                </div>
+                <PriceForm intialData={{ price: String(course.price) }} courseId={course._id} />
+              </div>
+{/* 
+              <div>
+                <div className="flex items-center gap-x-2">
+                  <IconBadge icon={File} />
+                  <h2 className="text-xl font-medium">Resources & Attachments</h2>
+                </div>
+                <AttachmentsForm intialData={course} courseId={course._id} />
+              </div> */}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  } catch (error) {
+    console.error("Course page error:", error);
     redirect("/");
   }
-
-  if (course.userId !== userId) {
-    redirect("/");
-  }
-
-  const requiredFields = [
-    course.title,
-    course.description,
-    course.imageUrl,
-    course.price,
-    course.categoryId,
-    publishedChapters
-    // courseChapters.some((chapter) => chapter.isPublished)
-  ];
-
-  const totalFields = requiredFields.length;
-  const completedFields = requiredFields.filter(Boolean).length;
-  const completionText = `${completedFields}/${totalFields}`;
-
-  const isComplete = requiredFields.every(Boolean)
-
-  return (
-    <>{!course.isPublished  && (
-      <Banner label="The course is not published. It will not be visible to the students!"/>
-    )}
-    {course.isPublished && (
-      <Banner label="The course is Published. It is visible to the students." variant="success" />
-    )}
-    <div className="p-6 ">
-      <div className="flex items-center justify-between bg-green-200 rounded-lg p-6">
-        <div className="flex flex-col gap-y-2">
-          <h1 className="text-2xl font-semibold">Course Setup</h1>
-          <span className="text-sm text-slate-700">
-            Complete all fields {completionText}
-          </span>
-        </div>
-        <Actions 
-         disabled={!isComplete}
-         courseId={params.courseId}
-         isPublished={course.isPublished}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-        <div>
-          <div className="flex items-center gap-x-2">
-            <IconBadge icon={LayoutDashboard} />
-            <h2 className="text-xl font-medium">Customize your course</h2>
-          </div>
-          <TitleForm intialData={course} courseId={course._id} />
-          <DescriptionForm intialData={course} courseId={course._id} />
-          <ImageForm intialData={course} courseId={course._id} />
-          <CategoryForm 
-          intialData={course} 
-          courseId={course._id} 
-          options={categories.map((category : {name: string, _id: string}) => ({label: category.name, value: category._id}))} />
-        </div>
-
-
-        <div className="space-y-6">
-          <div>
-            <div className="flex items-center gap-x-2">
-              <IconBadge icon={ListChecks} />
-              <h2 className="text-xl font-medium">
-                Course Chapters
-              </h2>
-            </div>
-             <ChapterForm courseChapters={courseChapters } courseId={course._id} />
-          </div>
-
-          <div>
-            <div className="flex items-center gap-x-2">
-              <IconBadge icon={CircleDollarSign} />
-              <h2 className="text-xl font-medium">Price</h2>
-            </div>
-              <PriceForm intialData={course} courseId={course._id} />
-          </div>
-
-          <div>
-             <div className="flex items-center gap-x-2">
-              <IconBadge icon={File} />
-              <h2 className="text-xl font-medium">Resources & Attachments</h2>
-            </div>
-             <AttachmentsForm intialData={course} courseId={course._id} />
-          </div>
-
-
-        </div>
-
-
-
-      </div>
-    </div>
-    </>
-  );
-};
-
+}

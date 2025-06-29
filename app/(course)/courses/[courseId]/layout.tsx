@@ -35,7 +35,7 @@ const chapters = await (await axios.get(`${process.env.BACK_END_URL}/api/chapter
                 />
             </div>
 
-            <div className="hidden md:flex h-full w-80 flex-col fixed inset-y-0 z-50">
+            <div className="show-on-md  h-full w-80 flex-col fixed inset-y-0 z-50">
                 <CourseSidebar 
                 userId={userId}
                 course={course}

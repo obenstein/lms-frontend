@@ -31,8 +31,10 @@ const ChapterVideoForm = ({ intialData, courseId, chapterId }: chapterVideoFormP
   const toggleEdit = () => setIsEditing((cur) => !cur);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("values", values);
     try {
       const res = await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
+      console.log({res})
       toast.success("successfully uploaded");
       toggleEdit();
       router.refresh();

@@ -14,16 +14,16 @@ interface attachmentsFormProps {
   intialData: {
     attachments: string[];
   };
-  courseId: string;
+  chapterId: string;
 }
 
 const formSchema = z.object({
   url: z.string().min(1, { message: "Image is required" }),
 });
 
-const AttachmentsForm = ({ intialData, courseId }: attachmentsFormProps) => {
+const AttachmentsForm = ({ intialData, chapterId }: attachmentsFormProps) => {
   const router = useRouter();
-
+  // console.log("courseId", courseId);
   const [isEditing, setIsEditing] = useState(false);
   const [deletingUrl, setDeletingUrl] = useState<number | null>(null);
 
@@ -31,10 +31,11 @@ const AttachmentsForm = ({ intialData, courseId }: attachmentsFormProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await axios.post(
-        `/api/courses/${courseId}/attachments`,
-        values
-      );
+    const res = await axios.post(
+  `/api/courses/${chapterId}/chapters/attachments`,
+  values
+);
+
       toast.success("successfully uploaded");
       toggleEdit();
       router.refresh();
@@ -47,7 +48,7 @@ const AttachmentsForm = ({ intialData, courseId }: attachmentsFormProps) => {
     try {
       setDeletingUrl(attachmentIdx)
       console.log(typeof attachmentIdx)
-     await axios.delete(`/api/courses/${courseId}/attachments/${attachmentIdx}`)
+     await axios.delete(`/api/courses/${chapterId}/chapters/attachments/${attachmentIdx}`)
      toast.success("Attachment successfully deleted!")
       router.refresh()
     } catch (error) {
