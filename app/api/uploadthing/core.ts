@@ -23,7 +23,15 @@ export const ourFileRouter = {
 
   chapterVideo: f({video : {maxFileCount: 1, maxFileSize: "2GB"}})
   .middleware(()=>handleAuth())
-  .onUploadComplete(()=>{})
+  .onUploadComplete(()=>{}),
+  assignmentAttachment:f(["image","video","text","pdf","audio"])
+  .middleware(() => handleAuth())
+  .onUploadComplete(()=>{}),
+  assignmentSubmission: f(["image","video","text","pdf","audio"])
+  .middleware(() => handleAuth())
+  .onUploadComplete(({metadata,file}) => {
+    console.log("Assignment submission file uploaded:", file.ufsUrl);
+  }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

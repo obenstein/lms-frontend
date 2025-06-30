@@ -11,6 +11,7 @@ import ChapterVideoForm from "./_components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 import AttachmentsForm from "../../_components/attachments-form";
+import AssignmentsForm from "./_components/assignments-form";
 export default async function ChapterIdPage({
   params,
 }: {
@@ -35,7 +36,7 @@ export default async function ChapterIdPage({
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
   const completionText = `(${completedFields}/${totalFields})`;
-  // const attachments= 
+  // const attachments=
   const isComplete = requiredFields.every(Boolean);
   return (
     <>
@@ -101,9 +102,13 @@ export default async function ChapterIdPage({
                 <IconBadge icon={File} />
                 <h2 className="text-xl font-medium">Resources & Attachments</h2>
               </div>
-              
+
               <AttachmentsForm intialData={chapter} chapterId={chapter._id} />
             </div>
+            <AssignmentsForm
+              chapterId={chapter._id}
+              initialData={chapter.assignments}
+            />
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={Eye} />
@@ -128,6 +133,7 @@ export default async function ChapterIdPage({
               chapterId={chapterId}
             />
           </div>
+          {/* {chapter._id} */}
         </div>
       </div>
     </>

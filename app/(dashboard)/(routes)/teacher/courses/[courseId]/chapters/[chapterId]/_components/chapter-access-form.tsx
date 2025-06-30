@@ -42,7 +42,9 @@ const ChapterAccessForm = ({
 
   const toggleEdit = () => setIsEditing((cur) => !cur);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<{
+    isFree: boolean;
+  }>({
     resolver: zodResolver(formSchema),
     defaultValues: intialData,
   });

@@ -34,7 +34,7 @@ const ChapterVideoForm = ({ intialData, courseId, chapterId }: chapterVideoFormP
     console.log("values", values);
     try {
       const res = await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}`, values);
-      console.log({res})
+      // console.log({res})
       toast.success("successfully uploaded");
       toggleEdit();
       router.refresh();

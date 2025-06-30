@@ -25,6 +25,7 @@ export const getChapters = async ({
       description: string;
       isCompleted: { [key: string]: boolean };
       attachments: string[];
+      assignments:any[]
     }[] = (await axios.get(`${process.env.BACK_END_URL}/api/chapters/${courseId}/published`))
       .data;
 

@@ -8,29 +8,27 @@ import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
-
-
+import { LearningObjectivesCard } from "./_components/learning-objectives-card";
+import { ResourcesCard } from "./_components/resource-card";
+import { ProgressOverview } from "./_components/progress-overview";
 export default async function ChapterIdPage({
   params,
 }: {
   params: { courseId: string; chapterId: string };
 }) {
   // Await params before using
-  
+
   const { userId } = await auth();
   if (!userId) {
     return redirect("/");
   }
   const { courseId, chapterId } = await params;
-  console.log({chapterId})
-  // Await the params object
-  // const { courseId, chapterId } = params;
 
   const {
     course,
     chapter,
     attachments,
-    purchased,  
+    purchased,
     muxData,
     nextChapter,
     isCompleted,
@@ -39,13 +37,14 @@ export default async function ChapterIdPage({
     courseId: courseId,
     chapterId: chapterId,
   });
-  
+
   if (!course || !chapter) {
     return redirect("/");
   }
 
   const isLocked = !chapter.isFree && !purchased;
   const completeOnEnd = !!purchased && isCompleted;
+
   // console.log("attachments", attachments);
   return (
     <div>
@@ -69,6 +68,13 @@ export default async function ChapterIdPage({
             isLocked={isLocked}
             completeOnEnd={completeOnEnd}
           />
+
+          <ProgressOverview
+            currentChapterTitle={chapter.title}
+            currentChapter={2}
+            totalChapters={course.chapters?.length || 0}
+            nextChapterTitle={nextChapter?._id}
+          />
         </div>
 
         <div>
@@ -82,43 +88,22 @@ export default async function ChapterIdPage({
                 isCompleted={isCompleted}
               />
             ) : (
-              <CourseEnrollButton
-                courseId={courseId}
-                price={course.price!}
-              />
+              <CourseEnrollButton courseId={courseId} price={course.price!} />
             )}
           </div>
           <Separator />
           <div>
+            {/* <LearningObjectivesCard
+              objectives={chapter.learningObjectives || []}
+            /> */}
             <Preview value={chapter.description} />
           </div>
           {!!attachments.length && (
-            <>
-              <Separator />
-              <h2 className="text-xl font-semibold mt-2 py-1 px-4">
-                Course Attachments
-              </h2>
-              <div className="p-4">
-                {attachments.map((attachment, idx) => (
-                  <a 
-                    href={attachment} 
-                    key={idx} 
-                    target="_blank"
-                    className="flex items-center p-3 w-full bg-sky-200 border text-sky-700 rounded-md hover:underline"
-                  >
-                    <File />
-                    <p className="line-clamp-1">
-                      {attachment}
-                    </p>
-                  </a>
-                ))}
-              </div>
-            </>
+            <ResourcesCard attachments={attachments} />
+
           )}
         </div>
       </div>
     </div>
   );
-};
-
-// export default ChapterIdPage;
+}

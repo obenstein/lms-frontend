@@ -50,7 +50,7 @@ export const VideoPlayer = ({
 
       if(nextChapterId){
         toast.success("Progress updated")
-        router.push(`/courses/${courseId}/overview`)
+        // router.push(`/courses/${courseId}/overview`)
       }
       else{
         router.push(`/courses/${courseId}/overview`)
