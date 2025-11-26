@@ -100,11 +100,11 @@ const AssignmentsForm = ({ initialData, chapterId }: AssignmentsFormProps) => {
         </Button>
       </div>
           
-      {!isEditing && initialData.length === 0 && (
+      {!isEditing && initialData?.length === 0 && (
         <p className="text-sm text-slate-500 italic">No assignments yet.</p>
       )}
 
-      {!isEditing && initialData.length > 0 && (
+      {!isEditing && initialData?.length > 0 && (
         <div className="space-y-2 mt-4">
           {initialData.map((a, idx) => (
             <div

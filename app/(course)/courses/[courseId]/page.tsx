@@ -1,7 +1,7 @@
 // app/teacher/courses/[courseId]/page.tsx
 import { redirect } from "next/navigation";
 
-const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
+const CourseIdPage = async ({ params }: { params: any }) => {
   // Await params before using
   const { courseId } = await params;
 

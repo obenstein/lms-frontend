@@ -1,10 +1,10 @@
-import { auth } from "@clerk/nextjs/server";
-import axios from "axios";
 import { NextResponse } from "next/server";
-
+import axios from "axios";
+// import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 export async function POST(
   req: Request,
-  { params }: { params: { courseId: string } }
+  context: { params: Promise<{ courseId: string }> } // <-- params is a Promise
 ) {
   try {
     const { userId } = await auth();
@@ -12,20 +12,28 @@ export async function POST(
       return new NextResponse("Unauthorized access denied", { status: 401 });
     }
 
-    const { courseId } = params;
+    const { courseId } = await context.params; // <-- MUST await this
     const values = await req.json();
 
-    const chapter = await axios.post(`${process.env.BACK_END_URL}/api/chapters`, {
-      ...values,
-      courseId,
-      userId,
+    const chapter = await axios.post(
+      `${process.env.BACK_END_URL}/api/chapters`,
+      {
+        ...values,
+        courseId,
+        userId,
+      }
+    );
+
+    return new NextResponse(JSON.stringify(chapter.data), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
     });
 
-    return new NextResponse(chapter.data);
   } catch (error) {
     console.log("/api/courses/chapters", error);
-    return new NextResponse("Internal sever error api/courses/courseId/chapters", {
-      status: 500,
-    });
+    return new NextResponse(
+      "Internal server error api/courses/courseId/chapters",
+      { status: 500 }
+    );
   }
 }

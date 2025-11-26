@@ -75,12 +75,12 @@ const AttachmentsForm = ({ intialData, chapterId }: attachmentsFormProps) => {
 
       {!isEditing && (
         <>
-          {intialData.attachments.length === 0 && (
+          { intialData && intialData?.attachments?.length === 0 && (
             <p className="text-sm text-slate-500 italic">
               No course attachments yet!
             </p>
           )}
-          {intialData.attachments.length > 0 && (
+          {intialData && intialData?.attachments?.length > 0 && (
             <div className="space-y-2">
               {intialData.attachments.map((attachmentUrl, attachmentIdx) => {
                 return (

@@ -25,7 +25,7 @@ export const Editor = ({ onChange, value }: EditorProps) => {
     if (editor && editor.getHTML() !== value) {
       editor.commands.setContent(value)
     }
-  }, [value])
+  }, [])
 
   return (
     <div className="bg-white border p-2 rounded-md min-h-[200px]">

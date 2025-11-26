@@ -79,9 +79,7 @@ const isWeekUnlocked = (
 
 export default async function CourseOverviewPage({
   params,
-}: {
-  params: { courseId: string };
-}) {
+}: any) {
   const { courseId } = await params;
   const { userId } = await auth();
 
@@ -153,7 +151,7 @@ export default async function CourseOverviewPage({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link
-                href="/search"
+                href="/"
                 className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -329,9 +327,9 @@ export default async function CourseOverviewPage({
                               </div>
                           
                             </div>
-                                {chapter.assignments.length > 0 && (
+                                {chapter && chapter?.assignments?.length > 0 && (
                                 <div className="mx-2 mt-2 space-y-2">
-                                  {chapter.assignments.map((assignment) => (
+                                  {chapter?.assignments?.map((assignment) => (
                                     <div
                                       key={assignment._id}
                                       className="flex items-center justify-between bg-blue-50 border border-blue-200 p-3 rounded-md"

@@ -10,20 +10,27 @@ import { isTeacher } from "@/lib/teacher";
 
 const NavbarRoutes = () => {
   const pathname = usePathname();
-
   const { userId } = useAuth()
-
+  const isLandingPage= pathname === "/"
   const isTeacherPage = pathname?.startsWith("/teacher");
   const isCoursePage = pathname?.includes("/courses");
   const isSearchPage = pathname === "/search";
 
   return (
     <>
-      {isSearchPage && (
+      {/* {isSearchPage && (
         <div className="show-on-md   md:block">
           <SearchInput />
         </div>
-      )}
+      )} */}
+      
+            {isLandingPage && (
+  <span className="text-2xl font-extrabold  bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent text-center vertical-center">
+    My Courses
+  </span  >
+)}
+
+      
       <div className="flex gap-x-2 ml-auto">
         {isTeacherPage || isCoursePage ? (
           <Link href="/">

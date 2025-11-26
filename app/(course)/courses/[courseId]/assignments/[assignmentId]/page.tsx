@@ -9,9 +9,7 @@ import { AssignmentSubmissionForm } from "./_components/assignment-submission-fo
 
 export default async function AssignmentDetailPage({
   params,
-}: {
-  params: { courseId: string; assignmentId: string };
-}) {
+}:any) {
   const { userId } = await auth();
   if (!userId) return redirect("/");
 
@@ -48,7 +46,7 @@ export default async function AssignmentDetailPage({
     <div>
       {existingSubmission && (
         <Banner
-          variant="success"
+        variant="success"
           label={`Assignment submitted on ${new Date(
             existingSubmission.submittedAt
           ).toLocaleString()}`}

@@ -61,7 +61,7 @@ export const Actions = ({
     return(<div className="flex items-center gap-x-2">
         <Button 
         onClick={onPublish} 
-        disabled={disabled || isLoading} 
+        // disabled={disabled || isLoading} 
         variant="outline" size="sm">
             {isPublished ? "Unpublish" : "Publish"}
         </Button>

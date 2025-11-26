@@ -23,7 +23,6 @@ export async function POST(
     `${process.env.BACK_END_URL}/api/chapters/${chapterId}/course/${courseId}/progress`,
     { userId, isCompleted: isCompleted }
   );
-
     return NextResponse.json(chapterProgress.data)
   } catch (error) {
     console.log("coursesid chapterid progress", error);

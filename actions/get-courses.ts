@@ -20,24 +20,27 @@ export const getCourses = async ({ userId, title, categoryId }: GetCourses) => {
 
     let courses = (
       await axios.get(
-        `${process.env.BACK_END_URL}/api/courses?${
-          categoryId ? `categoryId=${categoryId}` : ""
-        }&${title ? `title=${title}` : ""}`
+        `${process.env.BACK_END_URL}/api/courses` +
+          `?${categoryId ? `categoryId=${categoryId}` : ""}` +
+          `&${title ? `title=${title}` : ""}`
       )
     ).data;
 
-    courses = courses.filter(
-      (course: { isPublished: boolean }) => course.isPublished
-    );
+    // only show published
+    courses = courses.filter((course: { isPublished: boolean }) => course.isPublished);
 
     const courseWithProgress = await Promise.all(
       courses.map(async (course: course) => {
-        const category = categories.find(
+        // ---- FIXED: SAFE CATEGORY ----
+        const matchedCategory = categories.find(
           (cate: { _id: string; name: string }) =>
             cate._id === course.categoryId
-        ).name;
+        );
 
-        if (!course.purchased[userId]) {
+        const categoryName = matchedCategory?.name ?? "Unknown";
+
+        // ---- COURSE NOT PURCHASED ----
+        if (!course.purchased?.[userId]) {
           const chaptersLength = (
             await axios.get(
               `${process.env.BACK_END_URL}/api/chapters/${course._id}/published`
@@ -47,11 +50,12 @@ export const getCourses = async ({ userId, title, categoryId }: GetCourses) => {
           return {
             ...course,
             progress: null,
-            chaptersLength: chaptersLength,
-            category: category,
+            chaptersLength,
+            category: categoryName,
           };
         }
 
+        // ---- PURCHASED COURSE ----
         const [chaptersLength, progressPercentage] = await getProgress(
           userId,
           course._id
@@ -60,8 +64,8 @@ export const getCourses = async ({ userId, title, categoryId }: GetCourses) => {
         return {
           ...course,
           progress: progressPercentage,
-          chaptersLength: chaptersLength,
-          category: category,
+          chaptersLength,
+          category: categoryName,
         };
       })
     );

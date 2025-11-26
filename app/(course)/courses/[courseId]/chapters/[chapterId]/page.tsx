@@ -13,9 +13,7 @@ import { ResourcesCard } from "./_components/resource-card";
 import { ProgressOverview } from "./_components/progress-overview";
 export default async function ChapterIdPage({
   params,
-}: {
-  params: { courseId: string; chapterId: string };
-}) {
+}: any) {
   // Await params before using
 
   const { userId } = await auth();
@@ -98,7 +96,7 @@ export default async function ChapterIdPage({
             /> */}
             <Preview value={chapter.description} />
           </div>
-          {!!attachments.length && (
+          {!!attachments?.length && (
             <ResourcesCard attachments={attachments} />
 
           )}

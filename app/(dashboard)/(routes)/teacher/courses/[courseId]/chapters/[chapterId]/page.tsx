@@ -106,8 +106,8 @@ export default async function ChapterIdPage({
               <AttachmentsForm intialData={chapter} chapterId={chapter._id} />
             </div>
             <AssignmentsForm
-              chapterId={chapter._id}
-              initialData={chapter.assignments}
+              chapterId={chapter?._id}
+              initialData={chapter?.assignments}
             />
             <div>
               <div className="flex items-center gap-x-2">
