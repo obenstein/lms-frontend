@@ -20,54 +20,50 @@ export const CourseSidebarItem = ({
   courseId,
 }: courseSidebarItemProps) => {
 
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
 
-//   const Icon = isLocked ? Lock : isCompleted ? Check : Play
-const Icon = Play
-  const isActive = true
-     isCompleted = false
-    isLocked= false
+  const Icon = isLocked ? Lock : isCompleted ? Check : Play;
+  const isActive = pathname?.includes(_id);
+
   const onClick = () => {
-    router.push(`/courses/${courseId}/chapters/${_id}`)
+    router.push(`/courses/${courseId}/chapters/${_id}`);
   }
+
   return (
     <button
       onClick={onClick}
+      type="button"
       className={cn(
-        "w-full flex items-center gap-x-3 px-5 py-4 text-sm font-medium rounded-lg transition-all",
-        "hover:bg-blue-100/40 mb-2 ",
-        isActive && "bg-blue-100/60 text-blue-700 shadow-inner",
-        isCompleted && "text-emerald-700",
-        isLocked && "opacity-60 cursor-not-allowed hover:bg-transparent"
+        "group flex items-center gap-x-3 w-full px-4 py-3 text-sm font-bold rounded-2xl transition-all duration-200 border-2",
+        isActive
+          ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
+          : "bg-transparent text-slate-600 border-transparent hover:bg-slate-50 hover:text-slate-700 hover:border-slate-100",
+        isCompleted && "text-emerald-700 bg-emerald-50/50 border-emerald-100/50",
+        isCompleted && isActive && "bg-emerald-50 border-emerald-200",
+        isLocked && "opacity-60 cursor-not-allowed hover:bg-transparent hover:border-transparent"
       )}
     >
-      {/* Active Indicator */}
-      <div
-        className={cn(
-          "w-1 h-full rounded-r-lg bg-blue-600 opacity-0 transition-all",
-          isActive && "opacity-100"
-        )}
-      />
-
-      {/* Icon Bubble */}
-      <div
-        className={cn(
-          "w-9 h-9 flex items-center justify-center rounded-full transition",
-          isLocked
-            ? "bg-slate-200 text-slate-500"
-            : isCompleted
-            ? "bg-emerald-100 text-emerald-700"
-            : isActive
-            ? "bg-blue-200 text-blue-700"
-            : "bg-slate-100 text-slate-600"
-        )}
-      >
-        <Icon size={18} />
+      <div className={cn(
+        "flex items-center justify-center rounded-full w-8 h-8 transition-all",
+        isActive && "bg-blue-100 text-blue-600",
+        !isActive && isCompleted && "bg-emerald-100 text-emerald-600",
+        !isActive && !isCompleted && "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+      )}>
+        <Icon size={16} />
       </div>
-
-      {/* Title */}
-      <span className="text-slate-700 text-[15px]">{label}</span>
+      <span className={cn(
+        "line-clamp-2 text-left",
+        isActive && "text-blue-800",
+        isCompleted && "text-emerald-800"
+      )}>
+        {label}
+      </span>
+      {isCompleted && (
+        <div className="ml-auto border-2 border-emerald-200 rounded-full p-0.5 bg-emerald-100">
+          <Check className="h-3 w-3 text-emerald-600" />
+        </div>
+      )}
     </button>
   )
 }

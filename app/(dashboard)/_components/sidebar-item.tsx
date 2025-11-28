@@ -19,41 +19,37 @@ const SidebarItem = ({ icon: Icon, label, href }: sidebarItemProps) => {
   const isActive =
     (pathname === "/" && href === "/") ||
     pathname === href ||
-    pathname.startsWith(`${href}/`);
+    pathname?.startsWith(`${href}/`);
 
   return (
     <button
       onClick={onClick}
       type="button"
       className={cn(
-        "group flex items-center gap-x-3 w-full px-4 py-3 my-1 rounded-xl transition-all",
-        "hover:bg-sky-100/60 hover:text-sky-700",
-        "text-slate-600 font-medium",
-        isActive &&
-          "bg-sky-200/40 text-sky-800 shadow-sm border border-sky-300/60"
+        "group flex items-center gap-x-3 w-full px-4 py-3.5 rounded-2xl transition-all duration-200 border-2",
+        "hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 hover:shadow-sm",
+        isActive
+          ? "bg-blue-100/50 text-blue-700 border-blue-200 shadow-sm"
+          : "bg-transparent text-slate-500 border-transparent font-medium"
       )}
     >
-      {/* Icon Bubble */}
-      <div
-        className={cn(
-          "w-9 h-9 rounded-xl flex items-center justify-center transition-all",
-          "bg-slate-200/60 text-slate-600 group-hover:bg-sky-200/60 group-hover:text-sky-700",
-          isActive && "bg-sky-300/60 text-sky-800"
-        )}
-      >
-        <Icon size={20} />
+      <div className={cn(
+        "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+        isActive ? "bg-blue-200 text-blue-700" : "bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600"
+      )}>
+        <Icon size={22} />
       </div>
 
-      {/* Label */}
-      <span className="text-base">{label}</span>
+      <span className={cn(
+        "text-base font-bold",
+        isActive && "text-blue-800"
+      )}>
+        {label}
+      </span>
 
-      {/* Right Accent Strip */}
-      <div
-        className={cn(
-          "ml-auto w-[4px] h-7 rounded-full bg-sky-600/0 transition-all",
-          isActive && "bg-sky-600/80"
-        )}
-      />
+      {isActive && (
+        <div className="ml-auto w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+      )}
     </button>
   );
 };

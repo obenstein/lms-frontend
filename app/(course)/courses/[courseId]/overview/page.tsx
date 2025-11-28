@@ -146,164 +146,199 @@ export default async function CourseOverviewPage({
     const weeks = organizeChaptersByWeeks(courseChapters, chaptersPerWeek);
 
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white shadow-sm border-b">
+      <div className="min-h-screen bg-[#F0F9FF] bg-[radial-gradient(#E0F2FE_1px,transparent_1px)] [background-size:16px_16px]">
+        {/* Fun Header */}
+        <div className="bg-white/80 backdrop-blur-md border-b-4 border-blue-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+            <div className="flex items-center justify-between h-20">
               <Link
                 href="/"
-                className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition"
+                className="group flex items-center text-base font-bold text-blue-500 hover:text-blue-600 transition-all transform hover:scale-105 bg-blue-50 px-4 py-2 rounded-full border-2 border-blue-100 hover:border-blue-300"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Courses
+                <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+                Back to Adventures
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Course Info */}
+        {/* Course Info Hero */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-6">
+          <div className="bg-white rounded-3xl shadow-xl border-b-8 border-r-8 border-blue-200 p-8 mb-10 transform transition-all hover:-translate-y-1 duration-300">
+            <div className="flex flex-col lg:flex-row gap-8">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-yellow-100 text-yellow-700 font-bold text-sm mb-4 border-2 border-yellow-200">
+                  🚀 Let's Learn!
+                </div>
+                <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-tight">
                   {course.title}
                 </h1>
-                <p className="text-gray-600 mb-4">{course.description}</p>
+                <p className="text-lg text-slate-600 mb-6 leading-relaxed font-medium">
+                  {course.description}
+                </p>
 
-                <div className="flex items-center gap-4 mb-4">
-                  <Badge variant="secondary">
+                <div className="flex flex-wrap items-center gap-4 mb-8">
+                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-2xl border-2 border-indigo-100 text-indigo-700 font-bold">
+                    <span className="text-xl">📚</span>
                     {courseChapters.length} Chapters
-                  </Badge>
-                  <Badge variant="secondary">{weeks.length} Weeks</Badge>
+                  </div>
+                  <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-2xl border-2 border-purple-100 text-purple-700 font-bold">
+                    <span className="text-xl">🗺️</span>
+                    {weeks.length} Levels
+                  </div>
                 </div>
 
                 {progressPercentage > 0 && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        Course Progress
+                  <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-base font-bold text-green-800 flex items-center gap-2">
+                        <span>🏆</span> Your Adventure Progress
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm font-bold text-green-600 bg-white px-3 py-1 rounded-full border border-green-200">
                         {completedChapters}/{courseChapters.length} completed
                       </span>
                     </div>
-                    <CourseProgress
-                      value={progressPercentage}
-                      variant={
-                        progressPercentage === 100 ? "success" : "default"
-                      }
-                    />
+                    <div className="h-4 bg-white rounded-full overflow-hidden border-2 border-green-200">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-1000 ease-out rounded-full relative"
+                        style={{ width: `${progressPercentage}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                      </div>
+                    </div>
+                    <p className="text-center mt-3 text-green-700 font-medium text-sm">
+                      {progressPercentage === 100
+                        ? "🎉 Amazing! You've completed everything!"
+                        : "Keep going! You're doing great! 🌟"}
+                    </p>
                   </div>
                 )}
-                {/* <CourseProgress 
-                value={100}
-                variant="success"
-                /> */}
               </div>
             </div>
           </div>
 
-          {/* Weekly Content */}
-          <div className="space-y-6">
+          {/* Weekly Content / Levels */}
+          <div className="space-y-8">
+            <h2 className="text-3xl font-black text-slate-800 pl-2 border-l-8 border-yellow-400">
+              Your Journey Map
+            </h2>
+
             {weeks.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <p className="text-gray-500">
-                    No chapters available for this course.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="bg-white rounded-3xl p-12 text-center border-4 border-dashed border-gray-200">
+                <div className="text-6xl mb-4">📭</div>
+                <p className="text-xl text-gray-500 font-medium">
+                  No adventures available yet. Check back soon!
+                </p>
+              </div>
             ) : (
-              weeks.map((week) => {
+              weeks.map((week, index) => {
                 const isUnlocked = isWeekUnlocked(
                   week.weekNumber,
                   completedChapters,
                   chaptersPerWeek
                 );
 
+                // Alternating colors for weeks/levels
+                const colorSchemes = [
+                  { bg: "bg-blue-50", border: "border-blue-200", title: "text-blue-700", icon: "bg-blue-100 text-blue-600" },
+                  { bg: "bg-purple-50", border: "border-purple-200", title: "text-purple-700", icon: "bg-purple-100 text-purple-600" },
+                  { bg: "bg-orange-50", border: "border-orange-200", title: "text-orange-700", icon: "bg-orange-100 text-orange-600" },
+                ];
+                const theme = colorSchemes[index % colorSchemes.length];
+
                 return (
-                  <Card
+                  <div
                     key={week.weekNumber}
-                    className={`${!isUnlocked ? "opacity-60" : ""}`}
+                    className={`relative rounded-3xl overflow-hidden transition-all duration-300 ${!isUnlocked
+                        ? "bg-gray-100 border-4 border-gray-200 opacity-90 grayscale-[0.5]"
+                        : `bg-white border-b-8 border-r-8 ${theme.border} shadow-lg hover:scale-[1.01]`
+                      }`}
                   >
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <CardTitle className="text-xl">
-                            Week {week.weekNumber}
-                          </CardTitle>
-                          {!isUnlocked && (
-                            <Lock className="h-5 w-5 text-gray-400" />
-                          )}
+                    {!isUnlocked && (
+                      <div className="absolute inset-0 bg-gray-100/50 z-10 flex items-center justify-center backdrop-blur-[1px]">
+                        <div className="bg-white p-4 rounded-2xl shadow-xl border-4 border-gray-200 flex items-center gap-3 transform rotate-[-2deg]">
+                          <Lock className="h-8 w-8 text-gray-400" />
+                          <span className="font-bold text-gray-500 text-lg">Level Locked!</span>
                         </div>
-                        <Badge variant={isUnlocked ? "default" : "secondary"}>
-                          {isUnlocked ? "Available" : "Locked"}
+                      </div>
+                    )}
+
+                    <div className={`p-6 border-b-2 ${!isUnlocked ? "border-gray-200" : theme.border} ${!isUnlocked ? "bg-gray-50" : theme.bg}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-black shadow-sm ${!isUnlocked ? "bg-gray-200 text-gray-400" : "bg-white text-slate-700"}`}>
+                            {week.weekNumber}
+                          </div>
+                          <div>
+                            <h3 className={`text-2xl font-black ${!isUnlocked ? "text-gray-500" : theme.title}`}>
+                              Level {week.weekNumber}
+                            </h3>
+                            <p className={`font-medium ${!isUnlocked ? "text-gray-400" : "text-slate-500"}`}>
+                              {week.chapters.length} Mission{week.chapters.length !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge
+                          className={`px-4 py-1.5 text-sm rounded-xl font-bold ${isUnlocked
+                              ? "bg-green-500 hover:bg-green-600 border-b-4 border-green-700 text-white"
+                              : "bg-gray-300 text-gray-500 border-b-4 border-gray-400"
+                            }`}
+                        >
+                          {isUnlocked ? "🔓 Unlocked" : "🔒 Locked"}
                         </Badge>
                       </div>
-                      <CardDescription>
-                        {week.chapters.length} chapter
-                        {week.chapters.length > 1 ? "s" : ""} this week
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {week.chapters.map((chapter) => {
-                          const isCompleted = chapter.isCompleted?.userId;
-                          const canAccess =
-                            isUnlocked && (chapter.isFree || true); // Add purchase logic
+                    </div>
 
-                          return (
-                            <>
+                    <div className="p-6 space-y-4">
+                      {week.chapters.map((chapter) => {
+                        const isCompleted = chapter.isCompleted?.userId;
+                        const canAccess = isUnlocked && (chapter.isFree || true);
+
+                        return (
+                          <div key={chapter._id} className="group">
                             <div
-                              key={chapter._id}
-                              className={`flex items-center justify-between p-4 rounded-lg border ${
-                                isCompleted
+                              className={`relative flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 ${isCompleted
                                   ? "bg-green-50 border-green-200"
                                   : canAccess
-                                  ? "bg-white border-gray-200 hover:bg-gray-50"
-                                  : "bg-gray-50 border-gray-200"
-                              } transition-colors`}
+                                    ? "bg-white border-slate-100 hover:border-blue-300 hover:shadow-md hover:-translate-y-0.5"
+                                    : "bg-gray-50 border-gray-100"
+                                }`}
                             >
-                              <div className="flex items-center gap-4 flex-1">
+                              <div className="flex items-center gap-5 flex-1">
                                 <div
-                                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                                    isCompleted
-                                      ? "bg-green-500 text-white"
+                                  className={`flex items-center justify-center w-12 h-12 rounded-2xl shadow-sm transition-transform group-hover:scale-110 ${isCompleted
+                                      ? "bg-green-500 text-white rotate-[-3deg]"
                                       : canAccess
-                                      ? "bg-blue-500 text-white"
-                                      : "bg-gray-300 text-gray-600"
-                                  }`}
+                                        ? "bg-blue-500 text-white rotate-[3deg]"
+                                        : "bg-gray-200 text-gray-400"
+                                    }`}
                                 >
                                   {isCompleted ? (
-                                    <Play className="h-4 w-4" />
+                                    <span className="text-xl">✅</span>
                                   ) : canAccess ? (
-                                    <Play className="h-4 w-4" />
+                                    <Play className="h-6 w-6 fill-current" />
                                   ) : (
-                                    <Lock className="h-4 w-4" />
+                                    <Lock className="h-5 w-5" />
                                   )}
                                 </div>
 
                                 <div className="flex-1">
-                                  <h4 className="font-medium text-gray-900">
+                                  <h4 className={`text-lg font-bold ${isCompleted ? "text-green-800" : "text-slate-800"}`}>
                                     {chapter.title}
                                   </h4>
                                   {chapter.description && (
-                                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                                    <p className="text-sm text-slate-500 mt-1 line-clamp-1 font-medium">
                                       {chapter.description}
                                     </p>
                                   )}
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
                                 {chapter.isFree && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    Free
-                                  </Badge>
+                                  <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-black rounded-full border border-yellow-200 uppercase tracking-wider transform rotate-[-2deg]">
+                                    Free!
+                                  </span>
                                 )}
                                 {canAccess ? (
                                   <Link
@@ -311,58 +346,59 @@ export default async function CourseOverviewPage({
                                   >
                                     <Button
                                       size="sm"
-                                      variant={
-                                        isCompleted ? "outline" : "default"
-                                      }
+                                      className={`rounded-xl font-bold px-6 border-b-4 active:border-b-0 active:translate-y-1 transition-all ${isCompleted
+                                          ? "bg-green-100 text-green-700 hover:bg-green-200 border-green-300"
+                                          : "bg-blue-500 hover:bg-blue-600 text-white border-blue-700"
+                                        }`}
                                     >
-                                      {isCompleted ? "Review" : "Start"}
+                                      {isCompleted ? "Replay" : "Start!"}
                                     </Button>
                                   </Link>
                                 ) : (
-                                  <Button size="sm" variant="outline" disabled>
-                                    <Lock className="h-4 w-4 mr-2" />
+                                  <Button size="sm" variant="ghost" disabled className="text-gray-400 font-bold">
                                     Locked
                                   </Button>
                                 )}
                               </div>
-                          
                             </div>
-                                {chapter && chapter?.assignments?.length > 0 && (
-                                <div className="mx-2 mt-2 space-y-2">
-                                  {chapter?.assignments?.map((assignment) => (
-                                    <div
-                                      key={assignment._id}
-                                      className="flex items-center justify-between bg-blue-50 border border-blue-200 p-3 rounded-md"
-                                    >
+
+                            {/* Assignments / Side Quests */}
+                            {chapter && chapter?.assignments?.length > 0 && (
+                              <div className="ml-8 mt-3 pl-6 border-l-4 border-dashed border-slate-200 space-y-3">
+                                {chapter?.assignments?.map((assignment) => (
+                                  <div
+                                    key={assignment._id}
+                                    className="flex items-center justify-between bg-amber-50 border-2 border-amber-100 p-4 rounded-xl hover:bg-amber-100 transition-colors group/assignment"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="bg-amber-200 w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-sm group-hover/assignment:scale-110 transition-transform">
+                                        ⭐
+                                      </div>
                                       <div>
-                                        <h5 className="text-sm font-semibold text-blue-900">
-                                          📘 {assignment.title}
+                                        <h5 className="text-sm font-bold text-amber-900">
+                                          Side Quest: {assignment.title}
                                         </h5>
-                                        <p className="text-xs text-blue-800">
-                                          Due:{" "}
-                                          {new Date(
-                                            assignment.dueDate
-                                          ).toLocaleDateString()}{" "}
-                                          | {assignment.points} pts
+                                        <p className="text-xs text-amber-700 font-medium mt-0.5">
+                                          Reward: {assignment.points} XP Points
                                         </p>
                                       </div>
-                                      <Link
-                                        href={`/courses/${courseId}/assignments/${assignment._id}`}
-                                      >
-                                        <Button size="sm" variant="outline">
-                                          View
-                                        </Button>
-                                      </Link>
                                     </div>
-                                  ))}
-                                </div>
-                              )}
-                            </>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
+                                    <Link
+                                      href={`/courses/${courseId}/assignments/${assignment._id}`}
+                                    >
+                                      <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white border-b-4 border-amber-700 rounded-lg font-bold active:border-b-0 active:translate-y-1">
+                                        Accept
+                                      </Button>
+                                    </Link>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })
             )}

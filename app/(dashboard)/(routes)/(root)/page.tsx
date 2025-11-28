@@ -26,7 +26,7 @@ export default async function SearchPage({
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 min-h-screen bg-[#F0F9FF] bg-[radial-gradient(#E0F2FE_1px,transparent_1px)] [background-size:16px_16px]">
       <WelcomeBanner />
       <Categories items={categories} />
       <CoursesList items={courses} />

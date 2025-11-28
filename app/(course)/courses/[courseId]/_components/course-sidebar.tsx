@@ -26,35 +26,37 @@ export const CourseSidebar = ({
   const progressCount = (completedChapters / chapters.length) * 100;
 
   return (
-    <div className="h-full border-r bg-[#F9FBFF] flex flex-col overflow-y-auto shadow-sm">
+    <div className="h-full border-r-4 border-blue-100 bg-white flex flex-col overflow-y-auto shadow-lg">
       {/* Header */}
-      <div className="p-6 bg-white border-b shadow-sm">
-        <h1 className="font-bold text-xl text-slate-800">
+      <div className="p-6 bg-blue-50/50 border-b-4 border-blue-100">
+        <h1 className="font-black text-xl text-slate-800 leading-tight">
           {course.title}
         </h1>
 
         {purchased && (
-          <div className="mt-6">
+          <div className="mt-6 bg-white p-4 rounded-2xl border-2 border-blue-100 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Your Progress</span>
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">{Math.round(progressCount)}%</span>
+            </div>
             <CourseProgress
               variant="success"
               value={progressCount}
+              size="sm"
             />
-            <p className="text-xs text-slate-500 mt-2">
-              {Math.round(progressCount)}% completed
-            </p>
           </div>
         )}
       </div>
 
       {/* Chapters */}
-      <div className="flex flex-col w-full mt-2 px-2">
-        {chapters.map((chapter) => (
+      <div className="flex flex-col w-full p-4 space-y-2">
+        {chapters.map((chapter, index) => (
           <CourseSidebarItem
             key={chapter._id}
             _id={chapter._id}
             courseId={chapter.courseId}
             label={chapter.title}
-            isCompleted={chapter.isCompleted[userId]}
+            isCompleted={!!chapter.isCompleted?.[userId]}
             isLocked={!chapter.isFree && !purchased}
           />
         ))}

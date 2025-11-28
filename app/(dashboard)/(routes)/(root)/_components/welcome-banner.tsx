@@ -8,33 +8,32 @@ export const WelcomeBanner = () => {
   const studentName = user?.firstName || "Student";
 
   return (
-    <div className="w-full bg-[#F4F7FF] rounded-2xl p-6 md:p-8 flex items-center justify-between shadow-sm border border-blue-100 relative overflow-hidden">
-      
+    <div className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-10 flex items-center justify-between shadow-xl relative overflow-hidden group">
+
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/20 transition-all duration-700"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full -ml-10 -mb-10 blur-xl"></div>
+
       {/* Left Content */}
-      <div className="max-w-xl z-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-          Welcome, {studentName}! 👋
+      <div className="max-w-2xl z-10 relative">
+        <div className="inline-block px-4 py-1.5 rounded-full bg-white/20 text-white font-bold text-sm mb-4 border border-white/30 backdrop-blur-sm">
+          🚀 Mission Control
+        </div>
+        <h1 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
+          Welcome back, {studentName}! 👋
         </h1>
 
-        <p className="mt-3 text-gray-700 text-lg leading-relaxed">
-          Ready to build your first robot? You're about to start your journey into coding, robotics, and automation with 
-          <span className="font-semibold text-blue-600"> RoboAutomators</span>.
+        <p className="text-blue-100 text-lg md:text-xl leading-relaxed font-medium max-w-lg">
+          Ready for your next adventure? Your robots are waiting to be built! Let's code something amazing today.
         </p>
-
-        {/* <button className="mt-5 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-lg shadow-md transition">
-          Start Learning →
-        </button> */}
       </div>
 
-      {/* Robot Image */}
-      {/* <div className=" hidden  w-48 h-48 relative">
-        <Image
-          src="/robo.jpg"
-          alt="Robot mascot"
-          fill
-          className="object-contain drop-shadow-lg"
-        />
-      </div> */}
+      {/* Right Content / Icon */}
+      <div className="hidden md:block relative z-10 transform transition-transform group-hover:scale-110 duration-500">
+        <div className="text-[8rem] leading-none filter drop-shadow-2xl animate-bounce-slow">
+          🤖
+        </div>
+      </div>
     </div>
   );
 };
