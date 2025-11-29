@@ -17,13 +17,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="h-full">
-      <div className="h-[80px] md:pl-56 fixed inset-y-0 w-full z-50">
+      <div className="h-[80px] md:pl-64 fixed top-0 w-full z-50">
         <Navbar />
       </div>
       <div className="show-on-md flex-col h-full w-56 fixed inset-y-0 border-r z-50">
         <Sidebar />
       </div>
-      <main className="h-full pt-[80px] md:pl-56">{children}</main>
+      <main className="h-full pt-[80px] md:pl-64">{children}</main>
     </div>
   );
 };

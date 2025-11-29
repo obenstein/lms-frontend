@@ -49,7 +49,7 @@ export const CourseSidebar = ({
       </div>
 
       {/* Chapters */}
-      <div className="flex flex-col w-full p-4 space-y-2">
+      <div className="flex flex-col w-full p-4 space-y-2" >
         {chapters.map((chapter, index) => (
           <CourseSidebarItem
             key={chapter._id}
