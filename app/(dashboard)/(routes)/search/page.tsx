@@ -24,7 +24,7 @@ const SearchPage = async ({ ...searchParams } : searchPageProps) => {
   const categories = await (
     await axios.get(`${process.env.BACK_END_URL}/api/category`)
   ).data;
-
+  
   // console.log("searchParams", searchParams)
   const courses = await getCourses({userId, ...searchParams})
   // console.log("courses", courses)
