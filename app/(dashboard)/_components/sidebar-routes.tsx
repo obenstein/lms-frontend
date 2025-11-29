@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, Layout, List, BarChart, BookOpen, Video } from "lucide-react";
+import {Compass, Layout,List, BarChart, BookOpen, ListVideoIcon, Video, PersonStandingIcon} from "lucide-react"
 import SidebarItem from "./sidebar-item";
 import { usePathname } from "next/navigation";
 

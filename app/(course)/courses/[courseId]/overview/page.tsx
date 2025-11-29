@@ -334,12 +334,8 @@ export default async function CourseOverviewPage({
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-3">
-                                {chapter.isFree && (
-                                  <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-black rounded-full border border-yellow-200 uppercase tracking-wider transform rotate-[-2deg]">
-                                    Free!
-                                  </span>
-                                )}
+                              <div className="flex items-center gap-2">
+                               
                                 {canAccess ? (
                                   <Link
                                     href={`/courses/${courseId}/chapters/${chapter._id}`}

@@ -59,7 +59,7 @@ const CreatePage = () => {
                             <FormLabel>
                                 Course title
                             </FormLabel>
-                            <FormControl>
+                        <FormControl>
                                 <Input 
                                 disabled={isSubmitting}
                                 placeholder="e.g : Next JS full course"

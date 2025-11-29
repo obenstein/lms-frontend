@@ -37,7 +37,7 @@ const ChapterVideoForm = ({ intialData, courseId, chapterId }: chapterVideoFormP
       // console.log({res})
       toast.success("successfully uploaded");
       toggleEdit();
-      router.refresh();
+    router.refresh();
     } catch (error) {
       toast.error("something went wrong!!");
     }
