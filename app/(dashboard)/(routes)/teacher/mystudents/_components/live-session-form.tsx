@@ -1,14 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveSessionList from "./live-session-list";
+import { Calendar, Plus } from "lucide-react";
+
 interface Props {
   studentId: string;
 }
@@ -55,6 +58,11 @@ export default function LiveSessionForm({ studentId }: Props) {
   };
 
   const onSubmit = async () => {
+    if (!title || !startTime || !joinLink) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     setLoading(true);
     try {
       if (selectedSession) {
@@ -107,38 +115,87 @@ export default function LiveSessionForm({ studentId }: Props) {
   };
 
   return (
-    <div className="p-6 space-y-4 bg-white rounded-md shadow-md">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          {selectedSession ? "Edit Live Session" : "Schedule Live Session"}
-        </h2>
-        <Button variant="ghost" onClick={() => {
-          if (isEditing) resetForm();
-          setIsEditing(!isEditing);
-        }}>
-          {isEditing ? "Cancel" : "Edit"}
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <Card className="border-none shadow-lg">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Calendar className="h-6 w-6 text-primary" />
+                {selectedSession ? "Edit Live Session" : "Schedule Live Session"}
+              </CardTitle>
+              <CardDescription>
+                {isEditing 
+                  ? "Update the session details below" 
+                  : "Click the button to schedule a new live session"}
+              </CardDescription>
+            </div>
+            <Button 
+              variant={isEditing ? "outline" : "default"}
+              onClick={() => {
+                if (isEditing) resetForm();
+                setIsEditing(!isEditing);
+              }}
+            >
+              {isEditing ? "Cancel" : <><Plus className="h-4 w-4 mr-2" />New Session</>}
+            </Button>
+          </div>
+        </CardHeader>
 
-      {isEditing && (
-        <div className="space-y-4">
-          <Label>Title</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-          <Label>Description</Label>
-          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-          <Label>Start Time</Label>
-          <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-          <Label>Join Link</Label>
-          <Input value={joinLink} onChange={(e) => setJoinLink(e.target.value)} />
-          <Button onClick={onSubmit} disabled={loading}>
-            {loading ? "Saving..." : selectedSession ? "Update Session" : "Create Session"}
-          </Button>
-        </div>
-      )}
-
-      {!isEditing && (
-        <p className="text-gray-600">Click "Edit" to schedule or update a live session.</p>
-      )}
+        {isEditing && (
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
+              <Input 
+                id="title"
+                placeholder="Enter session title"
+                value={title} 
+                onChange={(e) => setTitle(e.target.value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description"
+                placeholder="Enter session description"
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="startTime">Start Time <span className="text-destructive">*</span></Label>
+              <Input 
+                id="startTime"
+                type="datetime-local" 
+                value={startTime} 
+                onChange={(e) => setStartTime(e.target.value)} 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="joinLink">Join Link <span className="text-destructive">*</span></Label>
+              <Input 
+                id="joinLink"
+                type="url"
+                placeholder="https://meet.google.com/..."
+                value={joinLink} 
+                onChange={(e) => setJoinLink(e.target.value)} 
+              />
+            </div>
+            
+            <Button 
+              onClick={onSubmit} 
+              disabled={loading || !title || !startTime || !joinLink}
+              className="w-full"
+            >
+              {loading ? "Saving..." : selectedSession ? "Update Session" : "Create Session"}
+            </Button>
+          </CardContent>
+        )}
+      </Card>
 
       <LiveSessionList
         studentId={studentId}
