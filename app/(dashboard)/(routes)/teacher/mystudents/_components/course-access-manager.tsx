@@ -36,6 +36,7 @@ export default function CourseAccessManager({ studentId }: Props) {
         const res = await axios.get(`/api/courses`, {
           params: { userId: studentId },
         });
+        console.log(res.data)
         const formatted = res.data.map((course: any) => ({
           label: course.title,
           value: course._id,

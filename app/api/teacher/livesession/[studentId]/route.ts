@@ -4,7 +4,6 @@ export async function GET(req: Request, { params }: { params: { studentId: strin
   const { studentId } = await params;
   try {
     
-
     if (!studentId) {
       return NextResponse.json(
         { message: "Missing studentId" },
@@ -13,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { studentId: strin
     }
 
     const liveSessions = await axios.get(
-      `${process.env.BACK_END_URL}/api/livesessions/student/${studentId}`
+      `${process.env.BACK_END_URL}/api/live-sessions/student/${studentId}`
     );
 
     return NextResponse.json(liveSessions.data);
@@ -39,7 +38,7 @@ export async function DELETE(req: Request, { params }: { params: { studentId: st
     }
 
     const deleteResponse = await axios.delete(
-      `${process.env.BACK_END_URL}/api/livesessions/${studentId}`
+      `${process.env.BACK_END_URL}/api/live-sessions/${studentId}`
     );
 
 
@@ -67,7 +66,7 @@ export async function PATCH(req: Request, { params }: { params: { studentId: str
     const updatedSession = await req.json();
     console.log("[LIVE_SESSION_PATCH]",updatedSession);
     const updateResponse = await axios.put(
-      `${process.env.BACK_END_URL}/api/livesessions/${studentId}`,
+      `${process.env.BACK_END_URL}/api/live-sessions/${studentId}`,
       updatedSession
     );
 

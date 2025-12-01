@@ -11,6 +11,8 @@ import { CourseProgressButton } from "./_components/course-progress-button";
 import { LearningObjectivesCard } from "./_components/learning-objectives-card";
 import { ResourcesCard } from "./_components/resource-card";
 import { ProgressOverview } from "./_components/progress-overview";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 export default async function ChapterIdPage({
   params,
 }: any) {
@@ -46,6 +48,8 @@ export default async function ChapterIdPage({
   // console.log("attachments", attachments);
   return (
     <div className="min-h-screen bg-[#F0F9FF] bg-[radial-gradient(#E0F2FE_1px,transparent_1px)] [background-size:16px_16px] pb-20">
+      
+
       {isCompleted && (
         <div className="bg-green-100 border-b-4 border-green-200 p-4 text-center animate-in slide-in-from-top">
           <p className="text-green-800 font-bold flex items-center justify-center gap-2">
@@ -62,9 +66,19 @@ export default async function ChapterIdPage({
       )}
 
       <div className="flex flex-col max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div className="mb-6">
+          <Link
+            href={`/courses/${courseId}/overview`}
+            className="inline-flex items-center px-4 py-2 rounded-full bg-white text-blue-600 font-bold hover:bg-blue-50 transition-all shadow-sm border-2 border-blue-100 hover:border-blue-200"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Mission Control
+          </Link>
+        </div>
 
         {/* Video Player "Cinema" Section */}
         <div className="bg-slate-900 rounded-[2rem] p-3 shadow-2xl border-b-8 border-slate-800 mb-8 transform transition-all hover:scale-[1.01]">
+          
           <div className="flex items-center justify-between px-4 py-2 mb-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>

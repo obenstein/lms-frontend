@@ -103,9 +103,9 @@ export const getAllCourses = async ({ userId, title, categoryId }: GetCourses) =
     courses = courses.filter((course: { isPublished: boolean }) => course.isPublished);
 
     // 5. Only return the courses that are in user's access list
-    courses = courses.filter((course: { _id: string }) =>
-      accessibleCourseIds.includes(course._id)
-    );
+    // courses = courses.filter((course: { _id: string }) =>
+    //   accessibleCourseIds.includes(course._id)
+    // );
 
     // 6. Add progress and category name
     const courseWithProgress = await Promise.all(

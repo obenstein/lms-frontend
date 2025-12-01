@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Clock, Play, Lock } from "lucide-react";
+import { ArrowLeft, Clock, Play, Lock, Radio, Video, Calendar } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,17 @@ interface Course {
   isPublished: boolean;
   categoryId: string;
   chapters: Chapter[];
+}
+
+interface LiveSession {
+  title:string;
+  _id: string;
+  studentId: string;
+  date: string;
+  startTime: string;
+  joinLink: string;
+  status: string;
+  createdAt: string;
 }
 
 // Helper function to organize chapters by weeks
@@ -118,15 +129,28 @@ export default async function CourseOverviewPage({
         `Chapters fetch failed: ${chaptersRes.status} ${chaptersRes.statusText}`
       );
     }
-    console.log("chapters:", chapters);
+    
+    // Fetch Live Sessions
+    let liveSessions: LiveSession[] = [];
+    try {
+        const sessionsRes = await fetch(
+            `${process.env.BACK_END_URL}/api/live-sessions/student/${userId}`,
+            { cache: "no-store" }
+        );
+        if (sessionsRes.ok) {
+            liveSessions = await sessionsRes.json();
+        }
+    } catch (error) {
+        console.error("Failed to fetch live sessions", error);
+    }
+
+    console.log({liveSessions})
+
     // Combine course data with chapters
     const course: Course = {
       ...courseData,
       chapters,
     };
-    console.log("courseId:", { course });
-
-    // console.log("Course data:", course);
 
     // Fetch user progress
     const courseChapters = course.chapters.filter(
@@ -135,7 +159,6 @@ export default async function CourseOverviewPage({
     const completedChapters = courseChapters.filter(
       (chapter) => chapter.isCompleted?.[userId] === true
     ).length;
-    console.log("chapters:", completedChapters);
 
     const progressPercentage =
       courseChapters.length > 0
@@ -216,6 +239,74 @@ export default async function CourseOverviewPage({
               </div>
             </div>
           </div>
+
+          {/* Live Sessions / Incoming Transmissions */}
+      {/* Live Sessions / Incoming Transmissions */}
+{liveSessions.length > 0 && (
+  <div className="mb-10">
+    <h2 className="text-3xl font-black text-slate-800 pl-2 border-l-8 border-red-400 mb-6 flex items-center gap-3">
+      <Radio className="h-8 w-8 text-red-500 animate-pulse" />
+      Incoming Transmissions
+    </h2>
+
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {liveSessions.map((session) => {
+        const date = new Date(session.startTime);
+        let joinUrl = session.joinLink;
+        if (!joinUrl.startsWith("http://") && !joinUrl.startsWith("https://")) {
+            joinUrl = `https://${joinUrl}`;
+        }
+
+        return (
+          <div
+            key={session._id}
+            className="bg-white rounded-3xl p-6 border-b-8 border-r-8 border-red-100 shadow-lg hover:scale-[1.02] transition-transform"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-red-100 rounded-2xl text-red-500">
+                <Video className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 text-lg">{session?.title}</h3>
+                <span className="text-xs font-bold text-red-400 uppercase tracking-wider">
+                  Live Session
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-2 text-slate-600 font-medium">
+                <Calendar className="h-4 w-4 text-slate-400" />
+                {date.toLocaleDateString(undefined, {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+
+              <div className="flex items-center gap-2 text-slate-600 font-medium">
+                <Clock className="h-4 w-4 text-slate-400" />
+                {date.toLocaleTimeString(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+
+            <a href={joinUrl} target="_blank" rel="noopener noreferrer" className="block">
+              <Button className="w-full rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white border-b-4 border-red-700 active:border-b-0 active:translate-y-1">
+                Join Mission Control
+              </Button>
+            </a>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+
 
           {/* Weekly Content / Levels */}
           <div className="space-y-8">

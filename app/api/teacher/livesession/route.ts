@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
     const liveSessionData = await axios.post(
-      `${process.env.BACK_END_URL}/api/livesessions`,
+      `${process.env.BACK_END_URL}/api/live-sessions`,
       {
         title,
         description,
