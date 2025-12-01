@@ -27,7 +27,7 @@ export const getAnalytics = async (userId: string) => {
     }
 
   } catch (error: any) {
-    console.log("get analytics", error.message);
+    
     return {
       data: [],
       totalRevenue: 0,

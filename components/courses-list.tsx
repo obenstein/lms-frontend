@@ -14,7 +14,7 @@ type courseWithProgress = {
   price: number;
   progress: number | null;
   chaptersLength: number;
-  category: string;
+
 };
 
 interface coursesListProps {
@@ -61,7 +61,7 @@ export const CoursesList = ({ items }: coursesListProps) => {
                   imageUrl={item.imageUrl}
                   price={item.price}
                   progress={item.progress}
-                  category={item.category}
+
                   chaptersLength={item.chaptersLength}
                 />
               </motion.div>
@@ -77,7 +77,7 @@ export const CoursesList = ({ items }: coursesListProps) => {
             </div>
             <h3 className="text-xl font-bold text-slate-700">No Courses Found</h3>
             <p className="text-sm text-slate-500 mt-2 max-w-sm text-center">
-              It looks a little empty here. Once courses are available, they'll appear in this list.
+              It looks a little empty here. Once courses are available, they&apos;ll appear in this list.
             </p>
           </div>
         </div>
