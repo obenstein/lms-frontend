@@ -1,15 +1,27 @@
-import { clerkMiddleware,createRouteMatcher } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
-  "/api/uploadthing"
+  '/api/uploadthing',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // If it's not a public route and there's no session, redirect to sign-in
+  const { userId } = await auth();
+  const { pathname } = req.nextUrl;
+
+  // Redirect unauthenticated users hitting the root to /sign-in
+  if (!userId && pathname === '/') {
+    const signInUrl = req.nextUrl.clone();
+    signInUrl.pathname = '/sign-in';
+    return NextResponse.redirect(signInUrl);
+  }
+
+  // Protect all non-public routes
   if (!isPublicRoute(req)) {
     await auth.protect();
-  } 
+  }
 });
 export const config = {
   matcher: [
