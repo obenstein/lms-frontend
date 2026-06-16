@@ -49,135 +49,127 @@ export default async function CourseIdPage({
   const { userId } = await auth();
   if (!userId) redirect("/");
 
+  let course: CourseType | null = null;
+  let categories: CategoryType[] = [];
+  let courseChapters: ChapterType[] = [];
+
   try {
     // Fetch course data
     const courseRes = await fetch(`${process.env.BACK_END_URL}/api/courses/${courseId}`);
-    if (!courseRes.ok) {
+    if (courseRes.ok) {
+      course = await courseRes.json();
+    } else {
       console.error(`Course fetch failed: ${courseRes.status}`);
-      redirect("/");
     }
-    const course: CourseType = await courseRes.json();
 
     // Fetch categories
     const categoryRes = await fetch(`${process.env.BACK_END_URL}/api/category`);
-    if (!categoryRes.ok) {
+    if (categoryRes.ok) {
+      categories = await categoryRes.json();
+    } else {
       console.error(`Categories fetch failed: ${categoryRes.status}`);
-      redirect("/");
     }
-    const categories: CategoryType[] = await categoryRes.json();
 
-    // Fetch course chapters - using the correct endpoint from your code
+    // Fetch course chapters
     const courseChaptersRes = await fetch(`${process.env.BACK_END_URL}/api/chapters/${courseId}`);
-    let courseChapters: ChapterType[] = [];
-    
     if (courseChaptersRes.ok) {
       courseChapters = await courseChaptersRes.json();
     } else {
       console.warn(`Chapters fetch failed: ${courseChaptersRes.status}`);
-      // Continue with empty chapters array instead of failing
     }
+  } catch (error) {
+    console.error("Course page error:", error);
+  }
 
-    // Validation checks
-    if (!course) {
-      redirect("/");
-    }
+  // Validation checks outside try-catch to avoid NEXT_REDIRECT issues
+  if (!course) {
+    redirect("/");
+  }
 
-    if (course.userId !== userId) {
-      redirect("/");
-    }
+  if (course.userId !== userId) {
+    redirect("/");
+  }
 
-    const publishedChapters = courseChapters.some((chapter) => chapter.isPublished);
+  const publishedChapters = courseChapters.some((chapter) => chapter.isPublished);
 
-    const requiredFields = [
-      course.title,
-      course.description,
-      course.imageUrl,
-      course.price,
-      course.categoryId,
-      publishedChapters
-    ];
+  const requiredFields = [
+    course.title,
+    course.description,
+    course.imageUrl,
+    course.price,
+    course.categoryId,
+    publishedChapters
+  ];
 
-    const totalFields = requiredFields.length;
-    const completedFields = requiredFields.filter(Boolean).length;
-    const completionText = `${completedFields}/${totalFields}`;
+  const totalFields = requiredFields.length;
+  const completedFields = requiredFields.filter(Boolean).length;
+  const completionText = `${completedFields}/${totalFields}`;
 
-    const isComplete = requiredFields.every(Boolean);
+  const isComplete = requiredFields.every(Boolean);
 
-    return (
-      <>
-        {!course.isPublished && (
-          <Banner label="The course is not published. It will not be visible to the students!" />
-        )}
-        {course.isPublished && (
-          <Banner label="The course is Published. It is visible to the students." variant="success" />
-        )}
-        <div className="p-6">
-          <div className="flex items-center justify-between bg-green-200 rounded-lg p-6">
-            <div className="flex flex-col gap-y-2">
-              <h1 className="text-2xl font-semibold">Course Setup</h1>
-              <span className="text-sm text-slate-700">
-                Complete all fields {completionText}
-              </span>
+  return (
+    <>
+      {!course.isPublished && (
+        <Banner label="The course is not published. It will not be visible to the students!" />
+      )}
+      {course.isPublished && (
+        <Banner label="The course is Published. It is visible to the students." variant="success" />
+      )}
+      <div className="p-6">
+        <div className="flex items-center justify-between bg-green-200 rounded-lg p-6">
+          <div className="flex flex-col gap-y-2">
+            <h1 className="text-2xl font-semibold">Course Setup</h1>
+            <span className="text-sm text-slate-700">
+              Complete all fields {completionText}
+            </span>
+          </div>
+          <Actions 
+            disabled={!isComplete}
+            courseId={course._id}
+            isPublished={course.isPublished}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+          <div>
+            <div className="flex items-center gap-x-2">
+              <IconBadge icon={LayoutDashboard} />
+              <h2 className="text-xl font-medium">Customize your course</h2>
             </div>
-            <Actions 
-              disabled={!isComplete}
-              courseId={course._id}
-              isPublished={course.isPublished}
+            <TitleForm intialData={course} courseId={course._id} />
+            <DescriptionForm intialData={course} courseId={course._id} />
+            <ImageForm intialData={course} courseId={course._id} />
+            <CategoryForm 
+              intialData={course} 
+              courseId={course._id} 
+              options={categories.map((category) => ({
+                label: category.name, 
+                value: category._id
+              }))} 
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+          <div className="space-y-6">
             <div>
               <div className="flex items-center gap-x-2">
-                <IconBadge icon={LayoutDashboard} />
-                <h2 className="text-xl font-medium">Customize your course</h2>
+                <IconBadge icon={ListChecks} />
+                <h2 className="text-xl font-medium">
+                  Course Chapters
+                </h2>
               </div>
-              <TitleForm intialData={course} courseId={course._id} />
-              <DescriptionForm intialData={course} courseId={course._id} />
-              <ImageForm intialData={course} courseId={course._id} />
-              <CategoryForm 
-                intialData={course} 
-                courseId={course._id} 
-                options={categories.map((category) => ({
-                  label: category.name, 
-                  value: category._id
-                }))} 
-              />
+              <ChapterForm courseChapters={courseChapters} courseId={course._id} />
             </div>
 
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center gap-x-2">
-                  <IconBadge icon={ListChecks} />
-                  <h2 className="text-xl font-medium">
-                    Course Chapters
-                  </h2>
-                </div>
-                <ChapterForm courseChapters={courseChapters} courseId={course._id} />
+            <div>
+              <div className="flex items-center gap-x-2">
+                <IconBadge icon={CircleDollarSign} />
+                <h2 className="text-xl font-medium">Price</h2>
               </div>
-
-              <div>
-                <div className="flex items-center gap-x-2">
-                  <IconBadge icon={CircleDollarSign} />
-                  <h2 className="text-xl font-medium">Price</h2>
-                </div>
-                <PriceForm intialData={{ price: String(course.price) }} courseId={course._id} />
-              </div>
-{/* 
-              <div>
-                <div className="flex items-center gap-x-2">
-                  <IconBadge icon={File} />
-                  <h2 className="text-xl font-medium">Resources & Attachments</h2>
-                </div>
-                <AttachmentsForm intialData={course} courseId={course._id} />
-              </div> */}
+              <PriceForm intialData={{ price: String(course.price) }} courseId={course._id} />
             </div>
           </div>
         </div>
-      </>
-    );
-  } catch (error) {
-    console.error("Course page error:", error);
-    redirect("/");
-  }
+      </div>
+    </>
+  );
 }
