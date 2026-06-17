@@ -4,10 +4,8 @@ export const uploadFile = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACK_END_URL || "http://localhost:4000";
-
   try {
-    const response = await axios.post(`${backendUrl}/api/upload`, formData, {
+    const response = await axios.post(`/api/upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
