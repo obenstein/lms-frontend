@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
-// import { auth } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { connectDB } from "@/lib/db";
+import ChapterModel from "@/lib/models/chapter-model";
+
+// Ported from lms-backend/controllers/chapter-controller.js:addChapter
+
 export async function POST(
   req: Request,
-  context: { params: Promise<{ courseId: string }> } // <-- params is a Promise
+  context: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -12,28 +15,20 @@ export async function POST(
       return new NextResponse("Unauthorized access denied", { status: 401 });
     }
 
-    const { courseId } = await context.params; // <-- MUST await this
+    const { courseId } = await context.params;
     const values = await req.json();
 
-    const chapter = await axios.post(
-      `${process.env.BACK_END_URL}/api/chapters`,
-      {
-        ...values,
-        courseId,
-        userId,
-      }
-    );
+    await connectDB();
+    const chapter = await ChapterModel.create({ ...values, courseId, userId });
 
-    return new NextResponse(JSON.stringify(chapter.data), {
+    return new NextResponse(JSON.stringify(chapter), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     console.log("/api/courses/chapters", error);
-    return new NextResponse(
-      "Internal server error api/courses/courseId/chapters",
-      { status: 500 }
-    );
+    return new NextResponse("Internal server error api/courses/courseId/chapters", {
+      status: 500,
+    });
   }
 }

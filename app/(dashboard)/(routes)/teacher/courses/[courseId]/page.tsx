@@ -12,6 +12,7 @@ import AttachmentsForm from "./_components/attachments-form";
 import ChapterForm from "./_components/chpater-form";
 import { Banner } from "@/components/banner";
 import { Actions } from "./_components/actions";
+ import { getCourseById, getCategories, getAllChapters } from "@/lib/queries";
 
 interface ChapterType {
   title: string;
@@ -55,29 +56,16 @@ export default async function CourseIdPage({
 
   try {
     // Fetch course data
-    const courseRes = await fetch(`${process.env.BACK_END_URL}/api/courses/${courseId}`);
-    if (courseRes.ok) {
-      course = await courseRes.json();
-    } else {
-      console.error(`Course fetch failed: ${courseRes.status}`);
-    }
+   const course = await getCourseById(courseId);
+
 
     // Fetch categories
-    const categoryRes = await fetch(`${process.env.BACK_END_URL}/api/category`);
-    if (categoryRes.ok) {
-      categories = await categoryRes.json();
-    } else {
-      console.error(`Categories fetch failed: ${categoryRes.status}`);
-    }
+   const categories = await getCategories();
 
     // Fetch course chapters
-    const courseChaptersRes = await fetch(`${process.env.BACK_END_URL}/api/chapters/${courseId}`);
-    if (courseChaptersRes.ok) {
-      courseChapters = await courseChaptersRes.json();
-    } else {
-      console.warn(`Chapters fetch failed: ${courseChaptersRes.status}`);
-    }
-  } catch (error) {
+  const courseChapters = await getAllChapters(courseId);
+  }
+   catch (error) {
     console.error("Course page error:", error);
   }
 

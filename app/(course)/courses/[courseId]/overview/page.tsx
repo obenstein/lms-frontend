@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Clock, Play, Lock, Radio, Video, Calendar } from "lucide-react";
 import Link from "next/link";
+import { getCourseById, getAllChapters, getLiveSessionsByStudent } from "@/lib/queries";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -98,53 +99,20 @@ export default async function CourseOverviewPage({
     return redirect("/");
   }
 
-  try {
+  try 
+  {
     // Fetch course data
-    const courseRes = await fetch(
-      `${process.env.BACK_END_URL}/api/courses/${courseId}`,
-      { cache: "no-store" }
-    );
-    if (!courseRes.ok) {
-      console.error(
-        `Course fetch failed: ${courseRes.status} ${courseRes.statusText}`
-      );
-      return redirect("/");
-    }
-
-    const courseData = await courseRes.json();
+      const courseData = await getCourseById(courseId);
+if (!courseData) return redirect("/");
 
     // Fetch chapters using the chapters route
 
-    const chaptersRes = await fetch(
-      `${process.env.BACK_END_URL}/api/chapters/${courseId}?userId=${userId}`,
-      { cache: "no-store" }
-    );
+    const chapters = await getAllChapters(courseId);
 
-    let chapters: Chapter[] = [];
-    if (chaptersRes.ok) {
-      const chaptersData = await chaptersRes.json();
-      chapters = Array.isArray(chaptersData) ? chaptersData : [];
-    } else {
-      console.warn(
-        `Chapters fetch failed: ${chaptersRes.status} ${chaptersRes.statusText}`
-      );
-    }
     
     // Fetch Live Sessions
-    let liveSessions: LiveSession[] = [];
-    try {
-        const sessionsRes = await fetch(
-            `${process.env.BACK_END_URL}/api/live-sessions/student/${userId}`,
-            { cache: "no-store" }
-        );
-        if (sessionsRes.ok) {
-            liveSessions = await sessionsRes.json();
-        }
-    } catch (error) {
-        console.error("Failed to fetch live sessions", error);
-    }
-
-    console.log({liveSessions})
+    //let liveSessions: LiveSession[] = [];
+     const liveSessions = await getLiveSessionsByStudent(userId);
 
     // Combine course data with chapters
     const course: Course = {

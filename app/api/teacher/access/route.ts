@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { connectDB } from "@/lib/db";
+import CourseAccessModel from "@/lib/models/course-access-model";
+
+// Ported from lms-backend/controllers/course-access-controller.js (grantAccess, revokeAccess)
 
 export async function POST(req: Request) {
   try {
-    const { studentId, courseId,title } = await req.json();
-    console.log("[ACCESS_POST]", studentId, courseId);
+    const { studentId, courseId, title } = await req.json();
 
     if (!studentId || !courseId) {
       return NextResponse.json(
@@ -13,28 +15,25 @@ export async function POST(req: Request) {
       );
     }
 
-    const access = await axios.post(`${process.env.BACK_END_URL}/api/access`, {
-      studentId,
-      courseId,
-      title,
-    });
+    await connectDB();
+    const access = await CourseAccessModel.create({ studentId, courseId, title });
 
-    return NextResponse.json(access.data);
+    return NextResponse.json(access);
   } catch (error) {
     console.error("[ACCESS_POST_ERROR]", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
+
 export async function DELETE(req: Request) {
   try {
     const { studentId, courseId } = await req.json();
 
-    const res = await axios.delete(`${process.env.BACK_END_URL}/api/access`, {
-      data: { studentId, courseId },
-    });
+    await connectDB();
+    const result = await CourseAccessModel.findOneAndDelete({ studentId, courseId });
+    if (!result) {
+      return NextResponse.json({ message: "Access not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ message: "Access revoked" }, { status: 200 });
   } catch (error) {

@@ -12,6 +12,8 @@ import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 import AttachmentsForm from "../../_components/attachments-form";
 import AssignmentsForm from "./_components/assignments-form";
+import { getOneChapter } from "@/lib/queries";
+
 export default async function ChapterIdPage({
   params,
 }: {
@@ -25,11 +27,7 @@ export default async function ChapterIdPage({
     return redirect("/");
   }
 
-  const chapter = await (
-    await axios.get(
-      `${process.env.BACK_END_URL}/api/chapters/${chapterId}/course/${courseId}`
-    )
-  ).data;
+  const chapter = await getOneChapter(chapterId, courseId);
 
   const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
 

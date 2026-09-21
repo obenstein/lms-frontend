@@ -1,20 +1,23 @@
-import axios from "axios";
+import { connectDB } from "@/lib/db";
+import ChapterModel from "@/lib/models/chapter-model";
+
+// Ported from lms-backend/controllers/chapter-controller.js:getPublishedChapterOfOneCourse
+// (this action reused that same endpoint) — now a direct query.
 
 export const getProgress = async (
   userId: string,
   courseId: string
 ): Promise<number[]> => {
   try {
-    const publishedChapters = (
-      await axios.get(`${process.env.BACK_END_URL}/api/chapters/${courseId}/published`)
-    ).data;
+    await connectDB();
 
+    const publishedChapters = await ChapterModel.find({
+      courseId,
+      isPublished: true,
+    });
 
     const validCompletedChapters = publishedChapters.filter(
-      (chapter: {
-        _id: string;
-        isCompleted: { [key: string]: boolean };
-      }) => chapter.isCompleted[userId]
+      (chapter) => chapter.isCompleted?.get(userId)
     );
 
     const progressPercentage =

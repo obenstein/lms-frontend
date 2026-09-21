@@ -1,65 +1,58 @@
-import axios from "axios";
-import { getProgress } from "./get-progress";
+import { connectDB } from "@/lib/db";
+import CategoryModel from "@/lib/models/category-model";
+import CourseModel from "@/lib/models/course-model";
+import ChapterModel from "@/lib/models/chapter-model";
+import { getProgress } from "@/actions/get-progress";
 
 type DashboardCourses = {
   completedCourses: any[];
   courseInProgress: any[];
 };
 
-export const GetDashboardCourses = async (
-  userId: string
-): Promise<DashboardCourses> => {
+// Ported from lms-backend controllers: category-controller.getAllCategorys,
+// course-controller.getPurchasedCourses, chapter-controller.getPublishedChapterOfOneCourse.
+
+export const GetDashboardCourses = async (userId: string): Promise<DashboardCourses> => {
   try {
-    const categories = (await axios.get(`${process.env.BACK_END_URL}/api/category`))
-      .data;
-    const purchasedCourses = (
-      await axios.get(
-        `${process.env.BACK_END_URL}/api/courses/user/${userId}/purchased`
-      )
-    ).data;
-  
+    await connectDB();
+
+    const categories = await CategoryModel.find().sort({ name: 1 });
+
+    const purchasedCourses = await CourseModel.find({
+      [`purchased.${userId}`]: true,
+    });
+
     const refinedCourses = await Promise.all(
-      purchasedCourses.map(async (course: any) => {
-        const publishedChapters = (
-          await axios.get(
-            `${process.env.BACK_END_URL}/api/chapters/${course._id}/published`
-          )
-        ).data;
+      purchasedCourses.map(async (course) => {
+        const publishedChapters = await ChapterModel.find({
+          courseId: String(course._id),
+          isPublished: true,
+        });
         const category = categories.find(
-          (cate: { _id: string; name: string }) =>
-            cate._id === course.categoryId
-        ).name;
+          (cate) => String(cate._id) === course.categoryId
+        )?.name;
 
         return {
-          ...course,
+          ...course.toObject(),
           chaptersLength: publishedChapters.length,
-          category: category,
+          category,
         };
       })
     );
 
-    for (let course of refinedCourses) {
+    for (const course of refinedCourses) {
       const [, progress] = await getProgress(userId, course._id);
       course["progress"] = progress;
     }
 
-    const completedCourses = refinedCourses.filter(
-      (course) => course.progress === 100
-    );
-
+    const completedCourses = refinedCourses.filter((course) => course.progress === 100);
     const courseInProgress = refinedCourses.filter(
       (course) => (course.progress ?? 0) < 100
     );
 
-    return {
-      completedCourses: completedCourses,
-      courseInProgress: courseInProgress,
-    };
+    return { completedCourses, courseInProgress };
   } catch (error: any) {
     console.log("get dashboard courses", error.message);
-    return {
-      completedCourses: [],
-      courseInProgress: [],
-    };
+    return { completedCourses: [], courseInProgress: [] };
   }
 };

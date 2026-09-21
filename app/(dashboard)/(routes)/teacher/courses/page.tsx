@@ -3,6 +3,7 @@ import { columns } from "./_components/columns";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import axios from "axios";
+import { getAllCourses } from "@/lib/queries";
 
 
 
@@ -14,7 +15,7 @@ const CoursesPage = async () => {
         return redirect("/")
     }
 
-    const courses = await (await axios.get(`${process.env.BACK_END_URL}/api/courses`)).data
+    const courses = await getAllCourses();
 
     return ( 
         <div className="p-6">

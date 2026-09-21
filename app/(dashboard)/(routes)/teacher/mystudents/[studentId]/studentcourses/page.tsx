@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
+import { getAccessListByStudent } from "@/lib/queries";
 interface Props {
   params: {
     studentId: string;
@@ -15,15 +15,8 @@ interface Props {
 }
 
 const fetchStudentAccess = async (studentId: string) => {
-  const res = await fetch(`${process.env.BACK_END_URL}/api/access/${studentId}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch course access");
-  }
-
-  return res.json();
+  const accessList = await getAccessListByStudent(studentId);
+  return accessList
 };
 
 export default async function StudentCoursesPage({ params }: Props) {

@@ -1,17 +1,21 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { connectDB } from "@/lib/db";
+import SubmissionModel from "@/lib/models/submission-model";
 
-export async function POST(req: Request, context: { params: { assignmentId: string } }) {
+// The file-upload path here already goes through /api/uploadthing (not the
+// Express backend) — untouched. Only the final `axios.post(.../submissions)`
+// call is ported, from lms-backend/controllers/submission-controller.js:submitAssignment.
+
+export async function POST(req: Request, context: { params: Promise<{ assignmentId: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { assignmentId } = await context.params; // ✅ Correct way to access assignmentId
+    const { assignmentId } = await context.params;
 
     let fileUrl = "";
 
-    // Support both JSON & form submission
     if (req.headers.get("content-type")?.includes("application/json")) {
       const body = await req.json();
       fileUrl = body.fileUrl;
@@ -23,7 +27,7 @@ export async function POST(req: Request, context: { params: { assignmentId: stri
 
       const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/uploadthing`, {
         method: "POST",
-        headers: { "slug": "assignmentSubmission" },
+        headers: { slug: "assignmentSubmission" },
         body: formData,
       });
 
@@ -38,7 +42,8 @@ export async function POST(req: Request, context: { params: { assignmentId: stri
 
     if (!fileUrl) return new NextResponse("File upload failed", { status: 500 });
 
-    const res = await axios.post(`${process.env.BACK_END_URL}/api/submissions`, {
+    await connectDB();
+    const submission = await SubmissionModel.create({
       studentId: userId,
       assignmentId,
       fileUrl,
@@ -46,10 +51,9 @@ export async function POST(req: Request, context: { params: { assignmentId: stri
       status: "submitted",
     });
 
-    return NextResponse.json({ message: "Submission successful", data: res.data });
+    return NextResponse.json({ message: "Submission successful", data: submission });
   } catch (error) {
     console.error("[ASSIGNMENT_SUBMIT]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
-

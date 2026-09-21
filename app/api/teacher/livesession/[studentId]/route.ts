@@ -1,81 +1,85 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
-export async function GET(req: Request, { params }: { params: { studentId: string } }) {
+import { connectDB } from "@/lib/db";
+import LiveSessionModel from "@/lib/models/live-session-model";
+
+// Ported from lms-backend/controllers/live-session-controller.js.
+// NB: the dynamic segment is named [studentId] for all three handlers, but
+// it's only actually a student id in GET (getSessionsByStudent, filters by
+// `invitees`). In DELETE/PATCH it was forwarded as the backend's `:id` param
+// (deleteSession/updateSession — i.e. the *session's* _id, not a student).
+// Preserved as-is; consider renaming the folder to [sessionId] and splitting
+// this into two routes if that confusion causes real bugs later.
+
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ studentId: string }> }
+) {
   const { studentId } = await params;
   try {
-    
     if (!studentId) {
-      return NextResponse.json(
-        { message: "Missing studentId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }
 
-    const liveSessions = await axios.get(
-      `${process.env.BACK_END_URL}/api/live-sessions/student/${studentId}`
-    );
+    await connectDB();
+    const sessions = await LiveSessionModel.find({ invitees: studentId }).sort({
+      startTime: -1,
+    });
 
-    return NextResponse.json(liveSessions.data);
+    return NextResponse.json(sessions);
   } catch (error) {
     console.error("[LIVE_SESSION_GET_ERROR]", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
-}   
-export async function DELETE(req: Request, { params }: { params: { studentId: string } }) {
+}
 
-
-    //studentID contains the Id
-  const { studentId } = await params;
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ studentId: string }> }
+) {
+  // `studentId` here is actually the session's _id — see note above.
+  const { studentId: sessionId } = await params;
   try {
-    if (!studentId) {
-      return NextResponse.json(
-        { message: "Missing studentId" },
-        { status: 400 }
-      );
+    if (!sessionId) {
+      return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }
 
-    const deleteResponse = await axios.delete(
-      `${process.env.BACK_END_URL}/api/live-sessions/${studentId}`
-    );
-
-
+    await connectDB();
+    const session = await LiveSessionModel.findByIdAndDelete(sessionId);
+    if (!session) {
+      return NextResponse.json({ message: "Session not found" }, { status: 404 });
+    }
 
     return NextResponse.json({ message: "Live session deleted successfully" });
   } catch (error) {
     console.error("[LIVE_SESSION_DELETE_ERROR]", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { studentId: string } }) {
-  const { studentId } = await params;
-  console.log("[LIVE_SESSION_PATCH] studentId:", studentId);
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ studentId: string }> }
+) {
+  // `studentId` here is actually the session's _id — see note above.
+  const { studentId: sessionId } = await params;
   try {
-    if (!studentId) {
-      return NextResponse.json(
-        { message: "Missing studentId" },
-        { status: 400 }
-      );
+    if (!sessionId) {
+      return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }
-    const updatedSession = await req.json();
-    console.log("[LIVE_SESSION_PATCH]",updatedSession);
-    const updateResponse = await axios.put(
-      `${process.env.BACK_END_URL}/api/live-sessions/${studentId}`,
-      updatedSession
-    );
 
-    return NextResponse.json(updateResponse.data);
+    const updatedSession = await req.json();
+
+    await connectDB();
+    const session = await LiveSessionModel.findByIdAndUpdate(sessionId, updatedSession, {
+      new: true,
+    });
+    if (!session) {
+      return NextResponse.json({ message: "Session not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(session);
   } catch (error) {
     console.error("[LIVE_SESSION_PATCH_ERROR]", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,33 +1,29 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { connectDB } from "@/lib/db";
+import CourseAccessModel from "@/lib/models/course-access-model";
 
+// Ported from lms-backend/controllers/course-access-controller.js:getAccessListByStudent
+// NB: original called `.populate("courseId")`, but courseId is stored as a
+// plain String (not a Course ref) in the schema, so populate was a silent
+// no-op there too — preserved as-is.
 
-
-export async function GET(req: Request, { params }: { params: { studentId: string } }) {
-  const { studentId } = params;
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ studentId: string }> }
+) {
   try {
-    console.log("[ACCESS_GET]", studentId);
+    const { studentId } = await params;
 
     if (!studentId) {
-      return NextResponse.json(
-        { message: "Missing studentId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }
 
-    const accessList = await axios.get(
-      `${process.env.BACK_END_URL}/api/access/${studentId}`
-    );
+    await connectDB();
+    const accessList = await CourseAccessModel.find({ studentId });
 
-    return NextResponse.json(accessList.data);
+    return NextResponse.json(accessList);
   } catch (error) {
     console.error("[ACCESS_GET_ERROR]", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
-
 }
-
-

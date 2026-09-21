@@ -1,72 +1,50 @@
-import axios from "axios";
-import { error } from "console";
+import { connectDB } from "@/lib/db";
+import CourseModel from "@/lib/models/course-model";
+import ChapterModel from "@/lib/models/chapter-model";
 
-interface getChaptersProps {
+interface GetChaptersProps {
   userId: string;
   chapterId: string;
   courseId: string;
 }
 
-export const getChapters = async ({
-  userId,
-  chapterId,
-  courseId,
-}: getChaptersProps) => {
-  try {
-    const course = (
-      await axios.get(`${process.env.BACK_END_URL}/api/courses/${courseId}`)
-    ).data;
-    const chapters: {
-      _id: string;
-      title: string;
-      position: string;
-      isFree: boolean;
-      playbackId: string;
-      description: string;
-      isCompleted: { [key: string]: boolean };
-      attachments: string[];
-      assignments:any[]
-    }[] = (await axios.get(`${process.env.BACK_END_URL}/api/chapters/${courseId}/published`))
-      .data;
+// Ported from lms-backend controllers: course-controller.getOneCourse,
+// chapter-controller.getPublishedChapterOfOneCourse.
 
-    const chapter =
-      chapters.find(
-        (chapter) =>
-          chapter._id === chapterId
-      ) || null;
+export const getChapters = async ({ userId, chapterId, courseId }: GetChaptersProps) => {
+  try {
+    await connectDB();
+
+    const course = await CourseModel.findById(courseId);
+    const chapters = await ChapterModel.find({ courseId, isPublished: true });
+
+    const chapter = chapters.find((c) => String(c._id) === chapterId) || null;
 
     if (!course || !chapter) {
       throw new Error("Course or Chapters is not found!");
     }
 
-    const purchased = true; // TODO: Implement purchase check logic
-    const isCompleted = chapter.isCompleted[userId]
+    const purchased = true; // TODO: Implement purchase check logic (unchanged from original)
+    const isCompleted = chapter.isCompleted?.get(userId);
 
     let muxData = null;
-    let nextChapter: {_id: string} | null = null;
-    let attachments: string[] = [];
-
-    
-      attachments = chapter.attachments;
-    
+    let nextChapter: { _id: unknown } | null = null;
+    const attachments: string[] = chapter.attachments;
 
     if (chapter.isFree || purchased) {
       muxData = chapter.playbackId;
       nextChapter = chapters[chapters.indexOf(chapter) + 1] || null;
     }
-  
 
-    return{
-        course,
-        chapter,
-        muxData,
-        attachments,
-        nextChapter,
-        purchased,
-        isCompleted
-    }
-
-
+    return {
+      course,
+      chapter,
+      muxData,
+      attachments,
+      nextChapter,
+      purchased,
+      isCompleted,
+    };
   } catch (error) {
     console.log("[Get chapters]", error);
     return {

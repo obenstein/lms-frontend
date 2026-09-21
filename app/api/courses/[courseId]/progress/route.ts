@@ -1,15 +1,21 @@
-// app/api/courses/[courseId]/progress/route.ts
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { connectDB } from "@/lib/db";
+import StudentProgressModel from "@/lib/models/student-progress-model";
+
+// ⚠️ The original route called `${BACK_END_URL}/api/progress/${courseId}/user/${userId}`,
+// which was never a real backend route (Express only mounted
+// `/api/student-progress/...`). This call was 404'ing in production before
+// the backend even went down. Ported here using the actual matching logic
+// from lms-backend/controllers/student-progress-controller.js:getCourseProgress,
+// which is what this endpoint was clearly meant to call.
 
 export async function GET(
   req: Request,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
     const { userId } = await auth();
-    
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -18,17 +24,39 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const requestedUserId = searchParams.get("userId");
 
-    // Only allow users to access their own progress or if they're the same user
     if (requestedUserId !== userId) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    // Fetch user progress from your backend
-    const progressResponse = await axios.get(
-      `${process.env.BACK_END_URL}/api/progress/${courseId}/user/${userId}`
-    );
+    await connectDB();
+    const progressRecords = await StudentProgressModel.find({
+      studentId: userId,
+      courseId,
+    }).populate("chapterId", "title position");
 
-    return NextResponse.json(progressResponse.data);
+    const completedChapters = progressRecords.filter((p) => p.completed).length;
+    const totalChapters = progressRecords.length;
+    const progressPercentage =
+      totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
+
+    const progressData = {
+      userId,
+      courseId,
+      completedChapters,
+      totalChapters,
+      progressPercentage,
+      chapters: progressRecords.reduce((acc: Record<string, unknown>, record: any) => {
+        acc[record.chapterId._id] = {
+          isCompleted: record.completed,
+          completedAt: record.lastWatchedAt,
+          chapterTitle: record.chapterId.title,
+          position: record.chapterId.position,
+        };
+        return acc;
+      }, {}),
+    };
+
+    return NextResponse.json(progressData);
   } catch (error) {
     console.log("[COURSE_PROGRESS_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });

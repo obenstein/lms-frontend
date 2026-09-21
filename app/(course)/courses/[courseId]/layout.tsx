@@ -3,6 +3,7 @@ import axios from "axios";
 import { redirect } from "next/navigation";
 import { CourseSidebar } from "./_components/course-sidebar";
 import { CourseNavbar } from "./_components/course-navbar";
+import { getCourseById, getPublishedChapters } from "@/lib/queries";
 
 
 interface LayoutProps {
@@ -19,10 +20,8 @@ const CourseLayout = async ({
         return redirect("/")
     }
   const { courseId } = await params;
-  const course = (await axios.get(`${process.env.BACK_END_URL}/api/courses/${courseId}`)).data;
-
-const chapters = await (await axios.get(`${process.env.BACK_END_URL}/api/chapters/${courseId}/published`)).data
-
+ const course = await getCourseById(courseId);
+ const chapters = await getPublishedChapters(courseId);
 
 
     return ( 

@@ -1,16 +1,12 @@
 // app/teacher/courses/[courseId]/page.tsx
 import { redirect } from "next/navigation";
+import { getPublishedChapters } from "@/lib/queries";
 
 const CourseIdPage = async ({ params }: { params: any }) => {
   // Await params before using
   const { courseId } = await params;
 
-  const res = await fetch(
-    `${process.env.BACK_END_URL}/api/chapters/${courseId}/published`,
-    { cache: "no-store" }
-  );
-
-  const courseChapters = await res.json();
+  const courseChapters = await getPublishedChapters(courseId);
 
   if (!courseChapters || !Array.isArray(courseChapters) || courseChapters.length === 0) {
     redirect("/");

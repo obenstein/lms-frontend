@@ -6,6 +6,7 @@ import { Calendar, FileText, ArrowLeft, Rocket, Scroll, CheckCircle, Clock, Down
 import Link from "next/link";
 import { Banner } from "@/components/banner";
 import { AssignmentSubmissionForm } from "./_components/assignment-submission-form";
+import { getAssignmentById, getSubmissionsByStudent } from "@/lib/queries";
 
 export default async function AssignmentDetailPage({
   params,
@@ -16,23 +17,15 @@ export default async function AssignmentDetailPage({
   const { courseId, assignmentId } = await params;
 
   // Fetch assignment
-  const assignmentRes = await fetch(
-    `${process.env.BACK_END_URL}/api/assignments/chapter/${assignmentId}?userId=${userId}`,
-    { cache: "no-store" }
-  );
-  if (!assignmentRes.ok) return redirect(`/courses/${courseId}/overview`);
+ const assignmentData = await getAssignmentById(assignmentId);
+ if (!assignmentData?.length) return redirect(`/courses/${courseId}/overview`);
 
-  const assignmentData = await assignmentRes.json();
+
   const assignment = Array.isArray(assignmentData) ? assignmentData[0] : assignmentData;
   if (!assignment) return redirect(`/courses/${courseId}/overview`);
 
   // Fetch user's submissions
-  const submissionsRes = await fetch(
-    `${process.env.BACK_END_URL}/api/submissions/${userId}`,
-    { cache: "no-store" }
-  );
-  const allSubmissions = submissionsRes.ok ? await submissionsRes.json() : [];
-
+   const allSubmissions = await getSubmissionsByStudent(userId);
   // Find if user has submitted this assignment
   const existingSubmission = allSubmissions.find(
     (s: any) => s.assignmentId === assignmentId

@@ -5,6 +5,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getCourses } from "@/actions/get-courses";
 import { WelcomeBanner } from "./_components/welcome-banner";
+import { getCategories } from "@/lib/queries";
+
 
 export default async function SearchPage({
   searchParams,
@@ -15,11 +17,7 @@ export default async function SearchPage({
   if (!userId) return redirect("/");
 
   const resolvedParams = await searchParams;
-
-  const categories = (
-    await axios.get(`${process.env.BACK_END_URL}/api/category`)
-  ).data;
-
+const categories = await getCategories();
   const courses = await getCourses({
     userId,
     ...resolvedParams,

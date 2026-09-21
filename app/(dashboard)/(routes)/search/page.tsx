@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getCourses } from "@/actions/get-courses";
 import { CoursesList } from "@/components/courses-list";
-
+import { getCategories } from "@/lib/queries";
 interface searchPageProps{
   searchParams: { 
     title?: string,
@@ -21,9 +21,7 @@ const SearchPage = async ({ ...searchParams } : searchPageProps) => {
     return redirect("/")
   }
 
-  const categories = await (
-    await axios.get(`${process.env.BACK_END_URL}/api/category`)
-  ).data;
+  const categories = await getCategories();
   
   // console.log("searchParams", searchParams)
   const courses = await getCourses({userId, ...searchParams})
