@@ -12,7 +12,7 @@ import AttachmentsForm from "./_components/attachments-form";
 import ChapterForm from "./_components/chpater-form";
 import { Banner } from "@/components/banner";
 import { Actions } from "./_components/actions";
- import { getCourseById, getCategories, getAllChapters } from "@/lib/queries";
+import { getCourseById, getCategories, getAllChapters } from "@/lib/queries";
 
 interface ChapterType {
   title: string;
@@ -44,9 +44,8 @@ export default async function CourseIdPage({
 }: {
   params: { courseId: string };
 }) {
-  // Await the params - this is the key fix for Next.js 15+
   const { courseId } = await params;
-  
+
   const { userId } = await auth();
   if (!userId) redirect("/");
 
@@ -55,22 +54,18 @@ export default async function CourseIdPage({
   let courseChapters: ChapterType[] = [];
 
   try {
-    // Fetch course data
-   const course = await getCourseById(courseId);
-
-
-    // Fetch categories
-   const categories = await getCategories();
-
-    // Fetch course chapters
-  const courseChapters = await getAllChapters(courseId);
-  }
-   catch (error) {
+    // NB: assign to the outer variables — do NOT re-declare with
+    // `const`/`let` here, that shadows the outer ones and they silently
+    // stay null/[] forever regardless of what's fetched.
+    course = await getCourseById(courseId);
+    categories = await getCategories();
+    courseChapters = await getAllChapters(courseId);
+  } catch (error) {
     console.error("Course page error:", error);
   }
 
-  // Validation checks outside try-catch to avoid NEXT_REDIRECT issues
   if (!course) {
+    console.log({ courseId });
     redirect("/");
   }
 
@@ -86,7 +81,7 @@ export default async function CourseIdPage({
     course.imageUrl,
     course.price,
     course.categoryId,
-    publishedChapters
+    publishedChapters,
   ];
 
   const totalFields = requiredFields.length;
@@ -111,7 +106,7 @@ export default async function CourseIdPage({
               Complete all fields {completionText}
             </span>
           </div>
-          <Actions 
+          <Actions
             disabled={!isComplete}
             courseId={course._id}
             isPublished={course.isPublished}
@@ -127,13 +122,13 @@ export default async function CourseIdPage({
             <TitleForm intialData={course} courseId={course._id} />
             <DescriptionForm intialData={course} courseId={course._id} />
             <ImageForm intialData={course} courseId={course._id} />
-            <CategoryForm 
-              intialData={course} 
-              courseId={course._id} 
+            <CategoryForm
+              intialData={course}
+              courseId={course._id}
               options={categories.map((category) => ({
-                label: category.name, 
-                value: category._id
-              }))} 
+                label: category.name,
+                value: category._id,
+              }))}
             />
           </div>
 
@@ -141,9 +136,7 @@ export default async function CourseIdPage({
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ListChecks} />
-                <h2 className="text-xl font-medium">
-                  Course Chapters
-                </h2>
+                <h2 className="text-xl font-medium">Course Chapters</h2>
               </div>
               <ChapterForm courseChapters={courseChapters} courseId={course._id} />
             </div>

@@ -3,6 +3,7 @@ import CategoryModel from "@/lib/models/category-model";
 import CourseModel from "@/lib/models/course-model";
 import ChapterModel from "@/lib/models/chapter-model";
 import { getProgress } from "@/actions/get-progress";
+import { toPlain } from "@/lib/serialize";
 
 type DashboardCourses = {
   completedCourses: any[];
@@ -50,7 +51,7 @@ export const GetDashboardCourses = async (userId: string): Promise<DashboardCour
       (course) => (course.progress ?? 0) < 100
     );
 
-    return { completedCourses, courseInProgress };
+    return toPlain({ completedCourses, courseInProgress });
   } catch (error: any) {
     console.log("get dashboard courses", error.message);
     return { completedCourses: [], courseInProgress: [] };

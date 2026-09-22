@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import CourseModel from "@/lib/models/course-model";
 import ChapterModel from "@/lib/models/chapter-model";
+import { toPlain } from "@/lib/serialize";
 
 interface GetChaptersProps {
   userId: string;
@@ -36,7 +37,7 @@ export const getChapters = async ({ userId, chapterId, courseId }: GetChaptersPr
       nextChapter = chapters[chapters.indexOf(chapter) + 1] || null;
     }
 
-    return {
+    return toPlain({
       course,
       chapter,
       muxData,
@@ -44,7 +45,7 @@ export const getChapters = async ({ userId, chapterId, courseId }: GetChaptersPr
       nextChapter,
       purchased,
       isCompleted,
-    };
+    });
   } catch (error) {
     console.log("[Get chapters]", error);
     return {

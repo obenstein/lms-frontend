@@ -1,3 +1,4 @@
+import { toPlain } from "@/lib/serialize";
 import { connectDB } from "@/lib/db";
 import CategoryModel from "@/lib/models/category-model";
 import CourseAccessModel from "@/lib/models/course-access-model";
@@ -83,7 +84,7 @@ export const getCourses = async ({ userId, title, categoryId }: GetCourses) => {
       })
     );
 
-    return courseWithProgress;
+    return toPlain(courseWithProgress);
   } catch (error) {
     console.log("Get course error", error);
     return [];
@@ -140,7 +141,7 @@ export const getAllCourses = async ({ userId, title, categoryId }: GetCourses) =
       })
     );
 
-    return courseWithProgress;
+    return toPlain(courseWithProgress);
   } catch (error) {
     console.log("Get course error", error);
     return [];
