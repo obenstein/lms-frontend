@@ -3,7 +3,7 @@
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import { useState } from "react";
-import { uploadFile } from "@/lib/upload";
+import { uploadFile } from "@/lib/lib-upload";
 import { UploadCloud, Loader2 } from "lucide-react";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 
