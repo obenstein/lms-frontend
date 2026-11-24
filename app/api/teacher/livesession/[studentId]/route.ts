@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import LiveSessionModel from "@/lib/models/live-session-model";
+import { requireTeacher } from "@/lib/auth-guards";
 
 // Ported from lms-backend/controllers/live-session-controller.js.
 // NB: the dynamic segment is named [studentId] for all three handlers, but
@@ -16,6 +17,9 @@ export async function GET(
 ) {
   const { studentId } = await params;
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     if (!studentId) {
       return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }
@@ -39,6 +43,9 @@ export async function DELETE(
   // `studentId` here is actually the session's _id — see note above.
   const { studentId: sessionId } = await params;
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     if (!sessionId) {
       return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }
@@ -63,6 +70,9 @@ export async function PATCH(
   // `studentId` here is actually the session's _id — see note above.
   const { studentId: sessionId } = await params;
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     if (!sessionId) {
       return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }

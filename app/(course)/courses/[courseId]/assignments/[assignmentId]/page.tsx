@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Banner } from "@/components/banner";
 import { AssignmentSubmissionForm } from "./_components/assignment-submission-form";
 import { getAssignmentById, getSubmissionsByStudent } from "@/lib/queries";
+import { getAssignmentCourseId, hasCourseAccess } from "@/lib/auth-guards";
 
 export default async function AssignmentDetailPage({
   params,
@@ -15,6 +16,11 @@ export default async function AssignmentDetailPage({
   if (!userId) return redirect("/");
 
   const { courseId, assignmentId } = await params;
+
+  if (!(await hasCourseAccess(userId, courseId))) return redirect("/");
+  if ((await getAssignmentCourseId(assignmentId)) !== courseId) {
+    return redirect(`/courses/${courseId}/overview`);
+  }
 
   // Fetch assignment
  const assignmentData = await getAssignmentById(assignmentId);

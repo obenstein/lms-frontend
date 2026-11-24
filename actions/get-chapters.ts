@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import CourseModel from "@/lib/models/course-model";
 import ChapterModel from "@/lib/models/chapter-model";
 import { toPlain } from "@/lib/serialize";
+import { hasCourseAccess } from "@/lib/auth-guards";
 
 interface GetChaptersProps {
   userId: string;
@@ -25,7 +26,9 @@ export const getChapters = async ({ userId, chapterId, courseId }: GetChaptersPr
       throw new Error("Course or Chapters is not found!");
     }
 
-    const purchased = true; // TODO: Implement purchase check logic (unchanged from original)
+    // Access is granted manually by the teacher, per student and per course
+    // (CourseAccess records). The teacher always has access.
+    const purchased = await hasCourseAccess(userId, courseId);
     const isCompleted = chapter.isCompleted?.get(userId);
 
     let muxData = null;

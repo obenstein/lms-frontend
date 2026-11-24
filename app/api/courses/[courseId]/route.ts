@@ -1,5 +1,5 @@
 import Mux from "@mux/mux-node";
-import { auth } from "@clerk/nextjs/server";
+import { requireCourseOwner } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import CourseModel from "@/lib/models/course-model";
@@ -30,12 +30,9 @@ export async function DELETE(
   { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied!", { status: 401 });
-    }
-
     const { courseId } = await params;
+    const guard = await requireCourseOwner(courseId);
+    if (guard.error) return guard.error;
 
     await connectDB();
     const courseChapters = await ChapterModel.find({ courseId });
@@ -54,13 +51,13 @@ export async function PATCH(
   { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized user", { status: 401 });
-    }
-
     const { courseId } = await params;
-    const values = await req.json();
+    const guard = await requireCourseOwner(courseId);
+    if (guard.error) return guard.error;
+    const { userId } = guard;
+
+    // Never let the request body move the course to another owner.
+    const { userId: _ignoredUserId, _id: _ignoredId, ...values } = await req.json();
 
     await connectDB();
     const course = await CourseModel.findByIdAndUpdate(

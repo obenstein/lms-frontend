@@ -1,5 +1,5 @@
 import { IconBadge } from "@/components/icon-bage";
-import { auth } from "@clerk/nextjs/server";
+import { requireTeacherPage } from "@/lib/auth-guards";
 import { CircleDollarSign, File, LayoutDashboard, ListChecks } from "lucide-react";
 import { redirect } from "next/navigation";
 
@@ -46,7 +46,7 @@ export default async function CourseIdPage({
 }) {
   const { courseId } = await params;
 
-  const { userId } = await auth();
+  const userId = await requireTeacherPage();
   if (!userId) redirect("/");
 
   let course: CourseType | null = null;

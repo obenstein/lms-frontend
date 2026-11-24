@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireCourseOwner } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
@@ -11,12 +11,9 @@ export async function PATCH(
   { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied", { status: 401 });
-    }
-
     const { courseId } = await params;
+    const guard = await requireCourseOwner(courseId);
+    if (guard.error) return guard.error;
     const chapterLists: { id: string; position: number }[] = await req.json();
 
     await connectDB();

@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAssignmentCourseId, requireCourseAccess } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import AssignmentModel from "@/lib/models/assignment-model";
@@ -11,10 +11,12 @@ export async function GET(
   { params }: { params: Promise<{ assignmentId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-
     const { assignmentId } = await params;
+
+    const courseId = await getAssignmentCourseId(assignmentId);
+    if (!courseId) return new NextResponse("Assignment not found", { status: 404 });
+    const guard = await requireCourseAccess(courseId);
+    if (guard.error) return guard.error;
 
     await connectDB();
     const assignments = await AssignmentModel.find({ _id: assignmentId });

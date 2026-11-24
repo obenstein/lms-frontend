@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireChapterOwner } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
@@ -15,19 +15,12 @@ export async function POST(
   { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied", { status: 401 });
-    }
-
     const { courseId: chapterId } = await params; // see note above
-    const { url } = await req.json();
+    const guard = await requireChapterOwner(chapterId);
+    if (guard.error) return guard.error;
+    const { chapter } = guard;
 
-    await connectDB();
-    const chapter = await ChapterModel.findOne({ _id: chapterId, userId });
-    if (!chapter) {
-      return NextResponse.json({ msg: "Chapter not found" }, { status: 404 });
-    }
+    const { url } = await req.json();
 
     chapter.attachments.push(url);
     await chapter.save();

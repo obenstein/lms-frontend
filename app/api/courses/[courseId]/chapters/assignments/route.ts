@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireChapterOwner } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
@@ -15,23 +15,19 @@ export async function POST(
   { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized user", { status: 401 });
-    }
-
+    // `courseId` here is used as the chapter's _id, matching the original
+    // call to `/api/chapters/:chapterId/assignments`.
     const { courseId } = await params;
+    const guard = await requireChapterOwner(courseId);
+    if (guard.error) return guard.error;
+    const { userId, chapter } = guard;
+
     const values = await req.json();
 
     await connectDB();
     const assignmentId = new mongoose.Types.ObjectId();
 
-    // 1. Add to chapter (courseId here is used as the chapter's _id, matching
-    //    the original call to `/api/chapters/:chapterId/assignments`)
-    const chapter = await ChapterModel.findOne({ _id: courseId });
-    if (!chapter) {
-      return NextResponse.json({ msg: "Chapter not found" }, { status: 404 });
-    }
+    // 1. Add to chapter
     chapter.assignments.push({
       _id: assignmentId.toString(),
       title: values.title,

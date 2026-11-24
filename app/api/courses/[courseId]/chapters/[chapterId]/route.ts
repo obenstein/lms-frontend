@@ -1,5 +1,5 @@
 import Mux from "@mux/mux-node";
-import { auth } from "@clerk/nextjs/server";
+import { requireChapterOwner } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
@@ -18,12 +18,10 @@ export async function DELETE(
   { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied", { status: 401 });
-    }
-
     const { courseId, chapterId } = await params;
+    const guard = await requireChapterOwner(chapterId, courseId);
+    if (guard.error) return guard.error;
+
     await connectDB();
 
     const existingChapter = await ChapterModel.findOne({ _id: chapterId, courseId });
@@ -46,13 +44,12 @@ export async function PATCH(
   { params }: { params: Promise<{ courseId: string; chapterId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied", { status: 401 });
-    }
-
     const { courseId, chapterId } = await params;
-    const values = await req.json();
+    const guard = await requireChapterOwner(chapterId, courseId);
+    if (guard.error) return guard.error;
+    const { userId } = guard;
+
+    const { userId: _u, courseId: _c, _id: _i, ...values } = await req.json();
 
     await connectDB();
 
@@ -112,7 +109,7 @@ export async function PATCH(
     }
 
     const chapter = await ChapterModel.findOneAndUpdate(
-      { _id: chapterId, courseId, userId },
+      { _id: chapterId, courseId },
       updateValues,
       { new: true }
     );

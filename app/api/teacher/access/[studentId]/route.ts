@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import CourseAccessModel from "@/lib/models/course-access-model";
+import { requireTeacher } from "@/lib/auth-guards";
 
 // Ported from lms-backend/controllers/course-access-controller.js:getAccessListByStudent
 // NB: original called `.populate("courseId")`, but courseId is stored as a
@@ -12,6 +13,9 @@ export async function GET(
   { params }: { params: Promise<{ studentId: string }> }
 ) {
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     const { studentId } = await params;
 
     if (!studentId) {

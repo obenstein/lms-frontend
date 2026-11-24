@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireChapterOwner } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
@@ -12,18 +12,10 @@ export async function DELETE(
   { params }: { params: Promise<{ courseId: string; attachmentIdx: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied!", { status: 401 });
-    }
-
     const { courseId: chapterId, attachmentIdx } = await params;
-
-    await connectDB();
-    const chapter = await ChapterModel.findOne({ _id: chapterId });
-    if (!chapter) {
-      return NextResponse.json({ msg: "Chapter not found" }, { status: 404 });
-    }
+    const guard = await requireChapterOwner(chapterId);
+    if (guard.error) return guard.error;
+    const { chapter } = guard;
 
     chapter.attachments = chapter.attachments.filter(
       (_attachment, idx) => idx !== parseInt(attachmentIdx, 10)

@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireTeacher } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import CourseModel from "@/lib/models/course-model";
@@ -10,10 +10,11 @@ import { getAllCourses } from "@/actions/get-courses";
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    const { title } = await req.json();
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+    const { userId } = guard;
 
-    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+    const { title } = await req.json();
 
     await connectDB();
     const course = await CourseModel.create({ userId, title });
@@ -26,6 +27,11 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+  // Full course catalog, used by the teacher's course-access manager.
+  // Students get their own list through actions/get-courses.ts instead.
+  const guard = await requireTeacher();
+  if (guard.error) return guard.error;
+
   // Unchanged: this already reads through actions/get-courses.ts,
   // which we're porting separately (see get-courses.ts below).
   const { searchParams } = new URL(req.url);

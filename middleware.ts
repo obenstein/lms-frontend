@@ -1,5 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import { isTeacher } from '@/lib/teacher'
+
+const isTeacherPage = createRouteMatcher(['/teacher(.*)']);
+const isTeacherApi = createRouteMatcher(['/api/teacher(.*)']);
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -21,6 +25,20 @@ export default clerkMiddleware(async (auth, req) => {
   // Protect all non-public routes
   if (!isPublicRoute(req)) {
     await auth.protect();
+  }
+
+  // Teacher area: only the teacher. Route handlers and the teacher layout
+  // check again (lib/auth-guards.ts); this is the first line of defence.
+  if (!isTeacher(userId)) {
+    if (isTeacherApi(req)) {
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+    if (isTeacherPage(req)) {
+      const homeUrl = req.nextUrl.clone();
+      homeUrl.pathname = '/';
+      homeUrl.search = '';
+      return NextResponse.redirect(homeUrl);
+    }
   }
 });
 export const config = {

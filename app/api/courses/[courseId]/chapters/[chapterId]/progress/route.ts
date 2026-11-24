@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { requireCourseAccess } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
@@ -11,11 +11,11 @@ interface RouteParams {
 
 export async function POST(req: Request, { params }: RouteParams) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied", { status: 401 });
-    }
     const { courseId, chapterId } = await params;
+    const guard = await requireCourseAccess(courseId);
+    if (guard.error) return guard.error;
+    const { userId } = guard;
+
     const { isCompleted } = await req.json();
 
     await connectDB();
