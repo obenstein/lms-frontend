@@ -1,13 +1,19 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, FileText, ArrowLeft, Rocket, Scroll, CheckCircle, Clock, Download } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { FileText, ArrowLeft, Rocket, Scroll, CheckCircle, Clock, Download } from "lucide-react";
 import Link from "next/link";
-import { Banner } from "@/components/banner";
 import { AssignmentSubmissionForm } from "./_components/assignment-submission-form";
 import { getAssignmentById, getSubmissionsByStudent } from "@/lib/queries";
-import { getAssignmentCourseId, hasCourseAccess } from "@/lib/auth-guards";
+import { canOpenChapter, getAssignmentLocation, hasCourseAccess } from "@/lib/auth-guards";
+
+const formatDate = (date: Date | string) =>
+  new Date(date).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
 export default async function AssignmentDetailPage({
   params,
@@ -18,7 +24,12 @@ export default async function AssignmentDetailPage({
   const { courseId, assignmentId } = await params;
 
   if (!(await hasCourseAccess(userId, courseId))) return redirect("/");
-  if ((await getAssignmentCourseId(assignmentId)) !== courseId) {
+  const location = await getAssignmentLocation(assignmentId);
+  if (
+    !location ||
+    location.courseId !== courseId ||
+    !(await canOpenChapter(userId, courseId, location.chapterId))
+  ) {
     return redirect(`/courses/${courseId}/overview`);
   }
 
@@ -42,37 +53,36 @@ export default async function AssignmentDetailPage({
   const isLate = now > dueDate;
 
   return (
-    <div className="p-6 min-h-screen bg-[#F0F9FF] bg-[radial-gradient(#E0F2FE_1px,transparent_1px)] [background-size:16px_16px]">
-      {existingSubmission && (
-        <div className="mb-6 transform hover:scale-105 transition-transform duration-300 max-w-4xl mx-auto">
-             <Banner
-                variant="success"
-                label={`Mission Accomplished! Assignment submitted on ${new Date(existingSubmission.submittedAt).toLocaleString()}`}
-            />
-        </div>
-      )}
-      {isLate && !existingSubmission && (
-        <div className="mb-6 max-w-4xl mx-auto">
-            <Banner variant="warning" label="Mission Expired: The submission deadline has passed." />
-        </div>
-      )}
-
+    <div className="p-4 sm:p-6 min-h-full bg-[#F0F9FF] bg-[radial-gradient(#E0F2FE_1px,transparent_1px)] [background-size:16px_16px]">
       <div className="flex flex-col max-w-4xl mx-auto pb-20">
         <div className="mb-6">
           <Link
             href={`/courses/${courseId}/overview`}
-            className="inline-flex items-center px-4 py-2 rounded-full bg-white text-blue-600 font-bold hover:bg-blue-50 transition-all shadow-sm border-2 border-blue-100 hover:border-blue-200"
+            className="inline-flex items-center px-4 py-2 rounded-full bg-white text-blue-600 font-bold hover:bg-blue-50 transition-colors shadow-sm text-sm border-2 border-blue-100 hover:border-blue-200"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Mission Control
+            Back to Journey Map
           </Link>
         </div>
+
+        {existingSubmission && (
+          <div className="mb-6 rounded-2xl bg-green-100 border-2 border-green-200 px-4 py-3 flex items-center gap-3 text-green-800 font-bold">
+            <span aria-hidden>🎉</span>
+            Mission Accomplished! Submitted on {formatDate(existingSubmission.submittedAt)}.
+          </div>
+        )}
+        {isLate && !existingSubmission && (
+          <div className="mb-6 rounded-2xl bg-yellow-100 border-2 border-yellow-200 px-4 py-3 flex items-center gap-3 text-yellow-900 font-bold">
+            <span aria-hidden>⏰</span>
+            The deadline for this mission has passed. Talk to your teacher if you still need to submit it.
+          </div>
+        )}
 
         <Card className="rounded-3xl border-4 border-indigo-100 shadow-xl overflow-hidden bg-white">
             <div className="bg-indigo-50/50 p-6 md:p-8 border-b border-indigo-100">
                 <div className="flex items-center gap-x-4">
-                    <div className="p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg transform -rotate-3">
-                        <Rocket className="h-8 w-8 text-white animate-pulse" />
+                    <div className="shrink-0 p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg transform -rotate-3">
+                        <Rocket className="h-8 w-8 text-white" />
                     </div>
                     <div>
                         <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
@@ -87,9 +97,11 @@ export default async function AssignmentDetailPage({
             </div>
 
           <CardContent className="p-6 md:p-8 space-y-8">
-            <div className="prose prose-lg max-w-none text-slate-600 leading-relaxed bg-slate-50 p-6 rounded-2xl border-2 border-slate-100 border-dashed">
+            {assignment.description && (
+              <div className="text-lg whitespace-pre-wrap break-words text-slate-600 leading-relaxed bg-slate-50 p-5 sm:p-6 rounded-2xl border-2 border-slate-200 border-dashed">
                 {assignment.description}
-            </div>
+              </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-orange-50 rounded-2xl p-4 border-2 border-orange-100 flex items-center gap-4 hover:shadow-md transition-shadow">
@@ -97,8 +109,8 @@ export default async function AssignmentDetailPage({
                         <Clock className="h-6 w-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-orange-400 uppercase tracking-wider">Mission Deadline</p>
-                        <p className="text-lg font-bold text-orange-900">{dueDate.toLocaleDateString()}</p>
+                        <p className="text-xs font-bold text-orange-700 uppercase tracking-wider">Mission Deadline</p>
+                        <p className="text-lg font-bold text-orange-900">{formatDate(dueDate)}</p>
                     </div>
                 </div>
 
@@ -108,7 +120,7 @@ export default async function AssignmentDetailPage({
                             <Download className="h-6 w-6" />
                         </div>
                         <div>
-                             <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Mission Resources</p>
+                             <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Mission Resources</p>
                              <a
                                 href={assignment.fileUrl}
                                 target="_blank"
@@ -135,7 +147,7 @@ export default async function AssignmentDetailPage({
                     href={existingSubmission.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition shadow-md hover:shadow-lg hover:-translate-y-0.5 transform duration-200"
+                    className="inline-flex items-center px-6 py-3 bg-green-700 text-white rounded-xl font-bold hover:bg-green-800 transition-colors shadow-md"
                   >
                     <FileText className="h-5 w-5 mr-2" />
                     View Your Work

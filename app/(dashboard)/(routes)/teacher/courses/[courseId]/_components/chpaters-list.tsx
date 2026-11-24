@@ -19,7 +19,6 @@ interface chpatersListPorps {
     _id: string;
     isPublished: boolean;
     position: number;
-    isFree: string;
   }[];
 }
 
@@ -98,7 +97,6 @@ export const ChaptersList = ({
                     </div>
                     {chapter.title}
                     <div className="ml-auto pr-2 flex items-center gap-x-2">
-                      {chapter.isFree && <Badge>FREE</Badge>}
                       <Badge
                         className={cn(
                           "bg-slate-500",

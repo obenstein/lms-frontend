@@ -5,6 +5,9 @@ export interface ICourseAccess extends Document {
   courseId: string;
   grantedAt: Date;
   title: string;
+  /** Set when the teacher verified the second month's fees; null = not approved. */
+  secondMonthApprovedAt?: Date | null;
+  secondMonthApprovedBy?: string | null;
 }
 
 const courseAccessSchema = new Schema<ICourseAccess>({
@@ -12,6 +15,8 @@ const courseAccessSchema = new Schema<ICourseAccess>({
   courseId: { type: String, required: true },
   grantedAt: { type: Date, default: Date.now },
   title: { type: String, required: true },
+  secondMonthApprovedAt: { type: Date, default: null },
+  secondMonthApprovedBy: { type: String, default: null },
 });
 
 courseAccessSchema.index({ studentId: 1, courseId: 1 }, { unique: true });

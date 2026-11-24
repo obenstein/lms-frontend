@@ -2,33 +2,50 @@
 
 import axios from "axios";
 import MuxPlayer from "@mux/mux-player-react";
-import { Loader2, Lock } from "lucide-react";
+import { Clapperboard, Loader2, Lock, VideoOff } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useConfettiStore } from "@/hooks/use-confetti-store";
 import toast from "react-hot-toast";
 
-interface VideoPlayerPorps {
-  playbackId: string;
+interface VideoPlayerProps {
+  playbackId: string | null;
   courseId: string;
   chapterId: string;
-  nextChapterId: string;
+  nextChapterId?: string;
   isLocked: boolean;
-  completeOnEnd: boolean;
+  lockMessage: string;
   title: string;
 }
 
+const Notice = ({
+  icon: Icon,
+  title,
+  message,
+}: {
+  icon: typeof Lock;
+  title: string;
+  message?: string;
+}) => (
+  <div className="absolute inset-0 flex items-center justify-center flex-col gap-y-2 sm:gap-y-3 bg-neutral-800 px-6 text-center">
+    <Icon className="h-8 w-8 sm:h-12 sm:w-12 text-yellow-300" />
+    <p className="text-base sm:text-xl font-bold text-white">{title}</p>
+    {message && <p className="text-xs sm:text-base text-neutral-300">{message}</p>}
+  </div>
+);
+
 export const VideoPlayer = ({
   chapterId,
-  completeOnEnd,
   courseId,
   isLocked,
+  lockMessage,
   nextChapterId,
   playbackId,
   title,
-}: VideoPlayerPorps) => {
+}: VideoPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const router = useRouter();
   const confetti = useConfettiStore();
 
@@ -41,48 +58,60 @@ export const VideoPlayer = ({
         }
       );
 
-      if (!nextChapterId) {
-        toast.success("GREAT! You have finshied the course successfully.");
+      if (nextChapterId) {
+        toast.success("Mission complete!");
+      } else {
+        toast.success("GREAT! You have finished the course successfully.");
         confetti.onOpen();
+        router.push(`/courses/${courseId}/overview`);
       }
 
-      router.refresh()
-
-      if(nextChapterId){
-        toast.success("Progress updated")
-        // router.push(`/courses/${courseId}/overview`)
-      }
-      else{
-        router.push(`/courses/${courseId}/overview`)
-      }
+      router.refresh();
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("We couldn't save your progress. Please try again.");
     }
   };
 
+  if (isLocked) {
+    return <Notice icon={Lock} title="This mission is locked" message={lockMessage} />;
+  }
+
+  if (!playbackId) {
+    return (
+      <Notice icon={Clapperboard} title="Video coming soon" message="Check back a little later." />
+    );
+  }
+
+  if (hasError) {
+    return (
+      <Notice
+        icon={VideoOff}
+        title="The video couldn't be loaded"
+        message="Check your connection and reload the page."
+      />
+    );
+  }
+
   return (
-    <div className="relative aspect-video">
-      {!isReady && !isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-neutral-800 ">
-          <Loader2 className="h-8 w-8 animate-spin text-secondary" />
+    <>
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-neutral-800">
+          <Loader2 className="h-8 w-8 animate-spin text-white" aria-label="Loading video" />
         </div>
       )}
-      {isLocked && (
-        <div className="absolute inset-0 flex items-center justify-center flex-col gap-y-2 text-secondary bg-neutral-800">
-          <Lock className="h-8 w-8" />
-          <p className="text-sm">This chapter is Locked!</p>
-        </div>
-      )}
-      {!isLocked && (
-        <MuxPlayer
-          className={cn(!isReady && "hidden")}
-          onCanPlay={() => setIsReady(true)}
-          playbackId={playbackId}
-          autoPlay
-          onEnded={onEnd}
-          title={title}
-        />
-      )}
-    </div>
+      <MuxPlayer
+        className={cn("h-full w-full", !isReady && "hidden")}
+        onCanPlay={() => setIsReady(true)}
+        onLoadedMetadata={() => setIsReady(true)}
+        onError={() => {
+          // An error before anything loaded; later hiccups are the player's to handle.
+          if (!isReady) setHasError(true);
+        }}
+        playbackId={playbackId}
+        autoPlay
+        onEnded={onEnd}
+        title={title}
+      />
+    </>
   );
 };

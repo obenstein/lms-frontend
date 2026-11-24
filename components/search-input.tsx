@@ -8,10 +8,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import queryString from "query-string";
 
 export const SearchInput = () => {
-  const [value, setValue] = useState("");
+  const searchParams = useSearchParams();
+  const [value, setValue] = useState(searchParams.get("title") ?? "");
   const debounceValue = useDebounce(value);
 
-  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -28,14 +28,15 @@ export const SearchInput = () => {
       },
       { skipNull: true, skipEmptyString: true }
     );
-    router.push(url);
+    router.replace(url);
   }, [pathname,debounceValue,currentCategoryId,router]);
 
   return (
     <div className="relative">
-      <Search className="h-4 w-4 mr-2 absolute top-3 left-3 text-slate-600" />
+      <Search className="h-4 w-4 absolute top-1/2 -translate-y-1/2 left-4 text-slate-500" />
       <Input onChange={(e)=> setValue(e.target.value)} value={value}
-        className="pl-9 w-full md:w-[300px] rounded-full bg-slate-100 focus-visible:ring-slate-200"
+        className="pl-10 h-11 w-full md:w-[340px] rounded-full bg-white border-2 border-slate-200 focus-visible:ring-blue-300"
+        aria-label="Search courses"
         placeholder="Search course name..."
       />
     </div>

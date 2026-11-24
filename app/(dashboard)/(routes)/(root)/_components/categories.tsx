@@ -19,7 +19,9 @@ const iconMap: Record<{name: string}["name"], IconType> = {
 }
 
 export const Categories = ({ items } : categoriesProps) => {
-    return(<div className="flex items-center gap-x-2 overflow-x-auto pb-2">
+    if (items.length === 0) return null
+
+    return(<div className="flex items-center gap-x-2 overflow-x-auto py-1">
         {items.map((item,idx) =>{
             return(
                 <CategoryItem

@@ -1,12 +1,11 @@
 import { IconBadge } from "@/components/icon-bage";
 import { requireTeacherPage } from "@/lib/auth-guards";
 import axios from "axios";
-import { ArrowLeft, Eye, LayoutDashboard, Video, File } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, Video, File } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import ChapterTitleForm from "./_components/chapter-title-form";
 import ChapterDescriptionForm from "./_components/chapter-description-form";
-import ChapterAccessForm from "./_components/chapter-access-form";
 import ChapterVideoForm from "./_components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
@@ -107,17 +106,6 @@ export default async function ChapterIdPage({
               chapterId={chapter?._id}
               initialData={chapter?.assignments}
             />
-            <div>
-              <div className="flex items-center gap-x-2">
-                <IconBadge icon={Eye} />
-                <h2 className="text-xl font-medium">Access Settings</h2>
-              </div>
-              <ChapterAccessForm
-                intialData={chapter}
-                courseId={courseId}
-                chapterId={chapterId}
-              />
-            </div>
           </div>
 
           <div>

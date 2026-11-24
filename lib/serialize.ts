@@ -5,7 +5,7 @@
  * Client Components — only plain objects are allowed.
  *
  * This relies on Mongoose's built-in toJSON on documents/Maps, so nested
- * Map fields (purchased, isCompleted, userProgress, etc.) come out as plain
+ * Map fields (isCompleted, userProgress, etc.) come out as plain
  * objects automatically — just use bracket/dot access on them afterward
  * instead of `.get()`/`.set()`.
  */

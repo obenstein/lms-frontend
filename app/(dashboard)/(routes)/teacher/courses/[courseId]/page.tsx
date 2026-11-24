@@ -1,13 +1,12 @@
 import { IconBadge } from "@/components/icon-bage";
 import { requireTeacherPage } from "@/lib/auth-guards";
-import { CircleDollarSign, File, LayoutDashboard, ListChecks } from "lucide-react";
+import { LayoutDashboard, ListChecks } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import TitleForm from "./_components/title-form";
 import DescriptionForm from "./_components/description-form";
 import ImageForm from "./_components/image-form";
 import CategoryForm from "./_components/category-form";
-import PriceForm from "./_components/price-form";
 import AttachmentsForm from "./_components/attachments-form";
 import ChapterForm from "./_components/chpater-form";
 import { Banner } from "@/components/banner";
@@ -19,7 +18,6 @@ interface ChapterType {
   _id: string;
   isPublished: boolean;
   position: number;
-  isFree: string;
 }
 
 interface CourseType {
@@ -27,7 +25,6 @@ interface CourseType {
   title: string;
   description: string;
   imageUrl: string;
-  price: number;
   categoryId: string;
   userId: string;
   isPublished: boolean;
@@ -79,7 +76,6 @@ export default async function CourseIdPage({
     course.title,
     course.description,
     course.imageUrl,
-    course.price,
     course.categoryId,
     publishedChapters,
   ];
@@ -132,22 +128,12 @@ export default async function CourseIdPage({
             />
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-x-2">
-                <IconBadge icon={ListChecks} />
-                <h2 className="text-xl font-medium">Course Chapters</h2>
-              </div>
-              <ChapterForm courseChapters={courseChapters} courseId={course._id} />
+          <div>
+            <div className="flex items-center gap-x-2">
+              <IconBadge icon={ListChecks} />
+              <h2 className="text-xl font-medium">Course Chapters</h2>
             </div>
-
-            <div>
-              <div className="flex items-center gap-x-2">
-                <IconBadge icon={CircleDollarSign} />
-                <h2 className="text-xl font-medium">Price</h2>
-              </div>
-              <PriceForm intialData={{ price: String(course.price) }} courseId={course._id} />
-            </div>
+            <ChapterForm courseChapters={courseChapters} courseId={course._id} />
           </div>
         </div>
       </div>

@@ -7,15 +7,16 @@ import LiveSessionModel from "@/lib/models/live-session-model";
 import AssignmentModel from "@/lib/models/assignment-model";
 import SubmissionModel from "@/lib/models/submission-model";
 import { toPlain } from "@/lib/serialize";
+import { sortPublishedChapters } from "@/lib/course-progression";
 
 // Thin read helpers for Server Components that used to `fetch`/`axios` the
 // Express backend directly (course layout/overview pages, dashboard, teacher
 // pages). Each one is a 1:1 port of the backend controller it replaces.
 //
 // Every function returns `toPlain(...)`-wrapped data so results are safe to
-// pass straight into Client Components as props. Map-typed fields (purchased,
-// isCompleted, userProgress) come back as plain objects after this — use
-// `course.purchased[userId]` instead of `course.purchased.get(userId)`.
+// pass straight into Client Components as props. Map-typed fields (isCompleted,
+// userProgress) come back as plain objects after this — use
+// `chapter.isCompleted[userId]` instead of `chapter.isCompleted.get(userId)`.
 
 export async function getCategories() {
   await connectDB();
@@ -46,7 +47,7 @@ export async function getAllChapters(courseId: string) {
 export async function getPublishedChapters(courseId: string) {
   await connectDB();
   const chapters = await ChapterModel.find({ courseId, isPublished: true });
-  return toPlain(chapters);
+  return toPlain(sortPublishedChapters(chapters));
 }
 
 // chapter-controller.getOneChapter

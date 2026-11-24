@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils"
 export type course = {
     _id: string,
     title: string,
-    price: number,
     isPublished: boolean
 }
 
@@ -30,29 +29,6 @@ export const columns: ColumnDef<course>[] = [
         </Button>
       )
     },
-  },
-  {
-    accessorKey: "price",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Price
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-        const price = parseFloat(row.getValue("price") || "0")
-        const formattedPrice = Intl.NumberFormat("en-US",{
-            style:"currency",
-            currency:"USD"
-        }).format(price)
-
-        return(<div className="">{formattedPrice}</div> )
-    }
   },
   {
     accessorKey: "isPublished",

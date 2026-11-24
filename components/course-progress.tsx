@@ -5,16 +5,14 @@ interface courseProgressProps{
     variant?: "default" | "success",
     value: number,
     size?: "default" | "sm"
-
 }
-
 
 const colorByVariant = {
      default: "text-sky-700",
      success: "text-emerald-700"
 }
 
-const sizeByVariant = { 
+const sizeByVariant = {
     default: "text-sm",
     sm: "text-xs"
 }
@@ -22,13 +20,13 @@ const sizeByVariant = {
  export const CourseProgress = ({ value, variant, size }: courseProgressProps) => {
     return(
         <div>
-            <Progress className="h-2" value={value} variant={variant} />
+            <Progress className="h-2.5" value={value} variant={variant} aria-label="Progress" />
             <p className={cn(
-                "font-medium mt-2 text-sky-700",
+                "font-bold mt-2",
                 colorByVariant[variant || "default"],
                 sizeByVariant[size || "default"]
             )}>
-                {Math.round(value)}% Completed
+                {value === 100 ? "Mission Complete! 🏆" : `${Math.round(value)}% complete`}
             </p>
         </div>
     )

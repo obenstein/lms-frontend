@@ -16,6 +16,8 @@ export const getProgress = async (
       isPublished: true,
     });
 
+    if (publishedChapters.length === 0) return [0, 0];
+
     const validCompletedChapters = publishedChapters.filter(
       (chapter) => chapter.isCompleted?.get(userId)
     );

@@ -16,7 +16,7 @@ export default async function Dashboard() {
   );
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="min-h-full p-4 sm:p-6 space-y-8 bg-[#F0F9FF] bg-[radial-gradient(#E0F2FE_1px,transparent_1px)] [background-size:16px_16px]">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InfoCard
           icon={Clock}

@@ -8,6 +8,7 @@ import ChapterModel, { type IChapter } from "@/lib/models/chapter-model";
 import CourseAccessModel from "@/lib/models/course-access-model";
 import AssignmentModel from "@/lib/models/assignment-model";
 import { isTeacher } from "@/lib/teacher";
+import { getChapterStatus, type CourseEntitlement } from "@/lib/course-progression";
 
 // Shared authorization helpers for API routes and Server Components.
 //
@@ -80,33 +81,74 @@ export async function requireChapterOwner(
 }
 
 /**
- * True when the user may view a course's content: the teacher, or a student
- * the teacher granted access to this course (CourseAccess record).
+ * What the user may see in a course: everything for the teacher; for a student
+ * the teacher granted access to (CourseAccess record), the dates and approval
+ * that decide which weeks are open. Null when the user has no access at all.
+ */
+export async function getCourseEntitlement(
+  userId: string | null | undefined,
+  courseId: string
+): Promise<CourseEntitlement | null> {
+  if (!userId) return null;
+  if (isTeacher(userId)) {
+    return { isTeacher: true, grantedAt: new Date(0), secondMonthApproved: true };
+  }
+
+  await connectDB();
+  // lean(): a hydrated doc would report "now" for a missing grantedAt (schema
+  // default), so the student's schedule would never advance.
+  const grant = await CourseAccessModel.findOne({ studentId: userId, courseId }).lean();
+  if (!grant) return null;
+
+  return {
+    isTeacher: false,
+    grantedAt: grant.grantedAt ?? (grant._id as mongoose.Types.ObjectId).getTimestamp(),
+    secondMonthApproved: !!grant.secondMonthApprovedAt,
+  };
+}
+
+/**
+ * True when the user may enter a course at all. Individual weeks can still be
+ * locked: use canOpenChapter / requireChapterAccess for chapter content.
  */
 export async function hasCourseAccess(
   userId: string | null | undefined,
   courseId: string
 ): Promise<boolean> {
-  if (!userId) return false;
-  if (isTeacher(userId)) return true;
-
-  await connectDB();
-  const grant = await CourseAccessModel.exists({ studentId: userId, courseId });
-  return !!grant;
+  return !!(await getCourseEntitlement(userId, courseId));
 }
 
-/** Signed-in user with access to the course (teacher or granted student). */
-export async function requireCourseAccess(
-  courseId: string
+/** True when the chapter's week is open for the user (see course-progression). */
+export async function canOpenChapter(
+  userId: string | null | undefined,
+  courseId: string,
+  chapterId: string
+): Promise<boolean> {
+  const entitlement = await getCourseEntitlement(userId, courseId);
+  if (!entitlement) return false;
+  if (entitlement.isTeacher) return true;
+
+  const chapters = await ChapterModel.find({ courseId, isPublished: true })
+    .select("position isPublished")
+    .lean();
+  return !!getChapterStatus(chapterId, chapters, entitlement)?.isUnlocked;
+}
+
+/** Signed-in user for whom the chapter's week is open (or the teacher). */
+export async function requireChapterAccess(
+  courseId: string,
+  chapterId: string
 ): Promise<{ userId: string; error?: never } | Fail> {
   const { userId } = await auth();
   if (!userId) return unauthorized();
-  if (!(await hasCourseAccess(userId, courseId))) return forbidden();
+  if (!(await canOpenChapter(userId, courseId, chapterId))) return forbidden();
   return { userId };
 }
 
-/** The course an assignment belongs to (via its chapter), or null. */
-export async function getAssignmentCourseId(assignmentId: string): Promise<string | null> {
+/** The course and chapter an assignment belongs to, or null. */
+export async function getAssignmentLocation(
+  assignmentId: string
+): Promise<{ courseId: string; chapterId: string } | null> {
   if (!mongoose.isValidObjectId(assignmentId)) return null;
 
   await connectDB();
@@ -114,7 +156,9 @@ export async function getAssignmentCourseId(assignmentId: string): Promise<strin
   if (!assignment) return null;
 
   const chapter = await ChapterModel.findById(assignment.chapterId).select("courseId");
-  return chapter?.courseId ?? null;
+  if (!chapter) return null;
+
+  return { courseId: chapter.courseId, chapterId: String(chapter._id) };
 }
 
 /** For teacher pages and layouts: send anyone else to the home page. */

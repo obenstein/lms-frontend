@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* Dark styles only apply inside .dark, not from the visitor's system setting. */
+@custom-variant dark (&:is(.dark *));
+
+/* Makes bg-primary, text-muted-foreground, border-input etc. available.
+   Tailwind v4 reads theme colors from here, not from tailwind.config.ts. */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
 html,
 body,
 :root {
@@ -79,6 +106,10 @@ body,
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 /* globals.css */
 .show-on-md {
@@ -104,3 +135,97 @@ body,
   animation: float 6s ease-in-out infinite;
 }
 
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* Rich text written in the editor (chapter descriptions). */
+.rich-text {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.rich-text .ProseMirror > * + * {
+  margin-top: 0.75rem;
+}
+
+.rich-text h1,
+.rich-text h2,
+.rich-text h3 {
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.rich-text h1 {
+  font-size: 1.375rem;
+}
+
+.rich-text h2 {
+  font-size: 1.2rem;
+}
+
+.rich-text h3 {
+  font-size: 1.05rem;
+}
+
+.rich-text ul,
+.rich-text ol {
+  padding-left: 1.5rem;
+}
+
+.rich-text ul {
+  list-style: disc;
+}
+
+.rich-text ol {
+  list-style: decimal;
+}
+
+.rich-text li + li {
+  margin-top: 0.25rem;
+}
+
+.rich-text blockquote {
+  border-left: 4px solid currentColor;
+  padding-left: 1rem;
+  opacity: 0.85;
+}
+
+.rich-text code {
+  background: rgb(0 0 0 / 0.07);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+}
+
+.rich-text pre {
+  background: #0f172a;
+  color: #f1f5f9;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.rich-text pre code {
+  background: none;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

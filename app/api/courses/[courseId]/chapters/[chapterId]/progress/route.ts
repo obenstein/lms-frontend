@@ -1,4 +1,4 @@
-import { requireCourseAccess } from "@/lib/auth-guards";
+import { requireChapterAccess } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
@@ -12,7 +12,7 @@ interface RouteParams {
 export async function POST(req: Request, { params }: RouteParams) {
   try {
     const { courseId, chapterId } = await params;
-    const guard = await requireCourseAccess(courseId);
+    const guard = await requireChapterAccess(courseId, chapterId);
     if (guard.error) return guard.error;
     const { userId } = guard;
 

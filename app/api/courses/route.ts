@@ -35,11 +35,10 @@ export async function GET(req: Request) {
   // Unchanged: this already reads through actions/get-courses.ts,
   // which we're porting separately (see get-courses.ts below).
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || "";
   const title = searchParams.get("title") || "";
   const categoryId = searchParams.get("categoryId") || "";
 
-  const courses = await getAllCourses({ userId, title, categoryId });
+  const courses = await getAllCourses({ title, categoryId });
 
   return NextResponse.json(courses);
 }

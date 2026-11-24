@@ -6,8 +6,6 @@ export interface ICourse extends Document {
   description?: string;
   imageUrl?: string;
   attachments: string[];
-  purchased: Map<string, boolean>;
-  price: number;
   isPublished: boolean;
   categoryId?: string;
   createdAt: Date;
@@ -25,8 +23,6 @@ const courseSchema = new Schema<ICourse>(
     description: String,
     imageUrl: String,
     attachments: { type: [{ type: String }], default: [] },
-    purchased: { type: Map, of: Boolean, default: {} },
-    price: { type: Number, default: 0 },
     isPublished: { type: Boolean, default: false },
     categoryId: String,
   },

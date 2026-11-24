@@ -34,7 +34,7 @@ export const Chart = ({data}: chartProps) => {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${value}`}
+                allowDecimals={false}
                 />
 
                 <Bar 

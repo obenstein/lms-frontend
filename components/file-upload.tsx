@@ -47,7 +47,7 @@ export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed rounded-md p-10 flex flex-col items-center justify-center cursor-pointer transition ${
+      className={`border-2 border-dashed rounded-2xl p-6 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
         isDragActive ? "border-sky-500 bg-sky-50" : "border-slate-300 hover:border-sky-400"
       } ${isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
@@ -63,7 +63,7 @@ export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
           <p className="text-sm text-slate-600 font-semibold">
             {isDragActive ? "Drop the file here..." : "Choose files or drag and drop"}
           </p>
-          <p className="text-xs text-slate-400 mt-2">
+          <p className="text-xs text-slate-500 mt-2">
             {endpoint === "courseImage" && "Image (max 4MB)"}
             {endpoint === "chapterVideo" && "Video (max 2GB)"}
             {endpoint !== "courseImage" && endpoint !== "chapterVideo" && "PDF, Image, Video, or Audio"}

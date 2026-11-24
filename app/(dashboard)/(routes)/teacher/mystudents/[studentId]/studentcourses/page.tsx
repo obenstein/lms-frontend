@@ -3,6 +3,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { requireTeacherPage } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import RevokeAccess from "../../_components/revoke-access";
+import SecondMonthApproval from "../../_components/second-month-approval";
+import { COURSE_CONFIG } from "@/lib/course-config";
+import { getScheduledWeek } from "@/lib/course-progression";
 import { ArrowLeft, BookOpen, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,6 +74,8 @@ export default async function StudentCoursesPage({ params }: Props) {
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
                       <TableHead className="font-semibold">Course Title</TableHead>
                       <TableHead className="font-semibold">Granted At</TableHead>
+                      <TableHead className="font-semibold">Schedule</TableHead>
+                      <TableHead className="font-semibold">Second Month</TableHead>
                       <TableHead className="text-center font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -96,6 +101,16 @@ export default async function StudentCoursesPage({ params }: Props) {
                               minute: '2-digit'
                             })}
                           </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          Week {getScheduledWeek(new Date(access.grantedAt))} of {COURSE_CONFIG.TOTAL_WEEKS}
+                        </TableCell>
+                        <TableCell>
+                          <SecondMonthApproval
+                            studentId={access.studentId}
+                            courseId={access.courseId}
+                            approvedAt={access.secondMonthApprovedAt ?? null}
+                          />
                         </TableCell>
                         <TableCell className="text-center">
                           <RevokeAccess studentId={access.studentId} courseId={access.courseId} />

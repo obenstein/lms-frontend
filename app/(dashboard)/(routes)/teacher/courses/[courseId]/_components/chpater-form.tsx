@@ -29,7 +29,6 @@ interface chapterFormProps {
     _id: string;
     isPublished: boolean;
     position: number;
-    isFree: string;
   }[];
   courseId: string;
 }

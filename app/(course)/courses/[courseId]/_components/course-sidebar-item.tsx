@@ -1,69 +1,73 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Check, Lock, Play } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Check, Lock, Map, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface courseSidebarItemProps {
-  _id: string
-  label: string
-  isCompleted: boolean
-  isLocked: boolean
-  courseId: string
+  href: string;
+  label: string;
+  isCompleted: boolean;
+  isLocked: boolean;
 }
 
 export const CourseSidebarItem = ({
-  _id,
+  href,
   label,
   isCompleted,
   isLocked,
-  courseId,
 }: courseSidebarItemProps) => {
-
-  const pathname = usePathname();
-  const router = useRouter();
-
+  const isActive = usePathname() === href;
   const Icon = isLocked ? Lock : isCompleted ? Check : Play;
-  const isActive = pathname?.includes(_id);
-
-  const onClick = () => {
-    router.push(`/courses/${courseId}/chapters/${_id}`);
-  }
+  const showCompleted = isCompleted && !isLocked;
 
   return (
-    <button
-      onClick={onClick}
-      type="button"
+    <Link
+      href={href}
+      prefetch={false}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "group flex items-center gap-x-3 w-full px-4 py-3 text-sm font-bold rounded-2xl transition-all duration-200 border-2",
-        isActive
-          ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
-          : "bg-transparent text-slate-600 border-transparent hover:bg-slate-50 hover:text-slate-700 hover:border-slate-100",
-        isCompleted && "text-emerald-700 bg-emerald-50/50 border-emerald-100/50",
-        isCompleted && isActive && "bg-emerald-50 border-emerald-200",
-        isLocked && "opacity-60 cursor-not-allowed hover:bg-transparent hover:border-transparent"
+        "group flex items-center gap-x-3 w-full px-3 py-2.5 text-sm font-bold rounded-2xl transition-colors border-2 border-transparent text-slate-600 hover:bg-slate-50",
+        showCompleted && "text-emerald-800 hover:bg-emerald-50",
+        isLocked && "font-medium text-slate-500",
+        isActive && "bg-blue-50 text-blue-800 border-blue-200 shadow-sm hover:bg-blue-50",
+        isActive && showCompleted && "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-50"
       )}
     >
-      <div className={cn(
-        "flex items-center justify-center rounded-full w-8 h-8 transition-all",
-        isActive && "bg-blue-100 text-blue-600",
-        !isActive && isCompleted && "bg-emerald-100 text-emerald-600",
-        !isActive && !isCompleted && "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
-      )}>
+      <span
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full w-8 h-8 bg-slate-100 text-slate-500",
+          !isLocked && !isCompleted && "bg-blue-100 text-blue-600",
+          showCompleted && "bg-emerald-500 text-white"
+        )}
+      >
         <Icon size={16} />
-      </div>
-      <span className={cn(
-        "line-clamp-2 text-left",
-        isActive && "text-blue-800",
-        isCompleted && "text-emerald-800"
-      )}>
-        {label}
       </span>
-      {isCompleted && (
-        <div className="ml-auto border-2 border-emerald-200 rounded-full p-0.5 bg-emerald-100">
-          <Check className="h-3 w-3 text-emerald-600" />
-        </div>
+      <span className="line-clamp-2 min-w-0 text-left">{label}</span>
+      {isLocked && <span className="sr-only">(locked)</span>}
+      {showCompleted && <span className="sr-only">(completed)</span>}
+    </Link>
+  );
+};
+
+export const CourseSidebarOverviewLink = ({ courseId }: { courseId: string }) => {
+  const href = `/courses/${courseId}/overview`;
+  const isActive = usePathname() === href;
+
+  return (
+    <Link
+      href={href}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "flex items-center gap-x-3 w-full px-3 py-2.5 text-sm font-bold rounded-2xl transition-colors border-2 border-transparent text-slate-600 hover:bg-slate-50",
+        isActive && "bg-blue-50 text-blue-800 border-blue-200 shadow-sm"
       )}
-    </button>
-  )
-}
+    >
+      <span className="flex shrink-0 items-center justify-center rounded-full w-8 h-8 bg-yellow-100 text-yellow-700">
+        <Map size={16} />
+      </span>
+      Journey Map
+    </Link>
+  );
+};

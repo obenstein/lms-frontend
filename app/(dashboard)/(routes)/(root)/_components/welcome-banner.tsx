@@ -24,11 +24,11 @@ export const WelcomeBanner = () => {
   }, []);
 
   return (
-    <div className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 rounded-[2rem] p-8 md:p-12 flex items-center justify-between shadow-2xl relative overflow-hidden group border-4 border-white/20">
+    <div className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 rounded-[2rem] p-6 sm:p-8 md:p-12 flex items-center justify-between shadow-2xl relative overflow-hidden group border-4 border-white/20">
       
       {/* Animated Background Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/15 transition-all duration-1000 animate-pulse-slow"></div>
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-400/20 rounded-full -ml-16 -mb-16 blur-2xl animate-blob"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/15 transition-all duration-1000"></div>
+      <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-400/20 rounded-full -ml-16 -mb-16 blur-2xl"></div>
       
       {/* Floating Stars/Dots */}
       <div className="absolute top-10 left-1/2 w-2 h-2 bg-white rounded-full opacity-60 animate-twinkle"></div>
@@ -42,12 +42,12 @@ export const WelcomeBanner = () => {
           <span>Hi, {studentName}!</span>
         </div>
         
-        <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-md">
+        <h1 className="text-3xl sm:text-4xl xl:text-5xl font-black text-white mb-6 tracking-tight drop-shadow-md">
           Welcome to Roboautomators LMS
         </h1>
 
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 max-w-lg transform transition-all hover:bg-white/15">
-          <p className="text-blue-50 text-xl md:text-2xl font-bold leading-relaxed">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10 max-w-lg transform transition-all hover:bg-white/15">
+          <p className="text-blue-50 text-lg md:text-2xl font-bold leading-relaxed">
             {message}
           </p>
         </div>

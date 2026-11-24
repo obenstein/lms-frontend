@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,9 +13,6 @@ interface sidebarItemProps {
 
 const SidebarItem = ({ icon: Icon, label, href }: sidebarItemProps) => {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const onClick = () => router.push(href);
 
   const isActive =
     (pathname === "/" && href === "/") ||
@@ -22,9 +20,9 @@ const SidebarItem = ({ icon: Icon, label, href }: sidebarItemProps) => {
     pathname?.startsWith(`${href}/`);
 
   return (
-    <button
-      onClick={onClick}
-      type="button"
+    <Link
+      href={href}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
         "group flex items-center gap-x-3 w-full px-4 py-3.5 rounded-2xl transition-all duration-200 border-2",
         "hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 hover:shadow-sm",
@@ -50,7 +48,7 @@ const SidebarItem = ({ icon: Icon, label, href }: sidebarItemProps) => {
       {isActive && (
         <div className="ml-auto w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
       )}
-    </button>
+    </Link>
   );
 };
 

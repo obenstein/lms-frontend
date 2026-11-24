@@ -65,7 +65,7 @@ export default function RevokeAccess({ studentId, courseId }: RevokeAccessProps)
         <AlertDialogHeader>
           <AlertDialogTitle>Revoke Course Access</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to revoke access to this course? The student will no longer be able to access this course content.
+            Are you sure you want to revoke access to this course? The student will no longer be able to access this course content. If you grant it again later, the weekly schedule restarts from week 1 and the second month must be approved again.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

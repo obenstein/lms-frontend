@@ -1,21 +1,18 @@
 "use client";
 
-import { SignIn, UserButton, useAuth } from "@clerk/nextjs";
-import { usePathname, useRouter } from "next/navigation";
+import { UserButton, useAuth } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
-import { SearchInput } from "./search-input";
 import { isTeacher } from "@/lib/teacher";
 
 const NavbarRoutes = () => {
   const pathname = usePathname();
-  const { userId } = useAuth()
-  const isLandingPage = pathname === "/"
+  const { isLoaded, userId } = useAuth()
   const isSearchPage = pathname === "/search";
   const isTeacherPage = pathname?.startsWith("/teacher");
   const isCoursePage = pathname?.includes("/courses");
-  const isChapterPage = pathname?.includes("/chapters");
 
   // If we are in a course layout, the CourseNavbar handles the title (showing course name).
   // So we might not need to show "Classroom" here if it duplicates.
@@ -42,24 +39,24 @@ const NavbarRoutes = () => {
       )}
 
 
-      <div className="flex gap-x-2 ml-auto">
+      <div className="flex items-center gap-x-2 ml-auto">
         {isTeacherPage || isCoursePage ? (
-          <Link href="/">
-            <Button size="sm" variant={"ghost"}>
+          <Button size="sm" variant="ghost" asChild>
+            <Link href="/">
               <LogOut className="h-4 w-4 mr-2" />
               Exit
-            </Button>
-          </Link>
-        ) : isTeacher(userId!) ? (
-          <Link href="/teacher/courses">
-            <Button size="sm" variant={"ghost"}>
-              Teacher Mode
-            </Button>
-          </Link>
+            </Link>
+          </Button>
+        ) : isTeacher(userId) ? (
+          <Button size="sm" variant="ghost" asChild>
+            <Link href="/teacher/courses">Teacher Mode</Link>
+          </Button>
         ) : null}
         <UserButton afterSignOutUrl="/" />
-        {!userId && (
-          <SignIn />
+        {isLoaded && !userId && (
+          <Button size="sm" asChild>
+            <Link href="/sign-in">Sign in</Link>
+          </Button>
         )}
       </div>
     </>

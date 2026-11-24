@@ -43,15 +43,16 @@ export const CategoryItem = ({
     <button
       onClick={onClick}
       type="button"
+      aria-pressed={isSelected}
       className={cn(
-        "py-3 px-5 text-sm font-bold rounded-full flex items-center gap-x-2 transition-all duration-200 border-2",
+        "shrink-0 py-2.5 px-5 text-sm font-bold rounded-full flex items-center gap-x-2 transition-all duration-200 border-2",
         isSelected
-          ? "border-blue-500 bg-blue-500 text-white shadow-md scale-105"
-          : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 hover:scale-105"
+          ? "border-blue-500 bg-blue-500 text-white shadow-md"
+          : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
       )}
     >
       {Icon && <Icon size={20} />}
-      <div className="truncate">{label}</div>
+      <div className="whitespace-nowrap">{label}</div>
     </button>
   );
 };

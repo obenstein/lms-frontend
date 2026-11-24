@@ -1,4 +1,4 @@
-import { getAssignmentCourseId, requireCourseAccess } from "@/lib/auth-guards";
+import { getAssignmentLocation, requireChapterAccess } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import AssignmentModel from "@/lib/models/assignment-model";
@@ -13,9 +13,9 @@ export async function GET(
   try {
     const { assignmentId } = await params;
 
-    const courseId = await getAssignmentCourseId(assignmentId);
-    if (!courseId) return new NextResponse("Assignment not found", { status: 404 });
-    const guard = await requireCourseAccess(courseId);
+    const location = await getAssignmentLocation(assignmentId);
+    if (!location) return new NextResponse("Assignment not found", { status: 404 });
+    const guard = await requireChapterAccess(location.courseId, location.chapterId);
     if (guard.error) return guard.error;
 
     await connectDB();

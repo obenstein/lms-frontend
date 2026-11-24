@@ -36,6 +36,55 @@ export async function POST(req: Request) {
   }
 }
 
+/**
+ * Approve (or withdraw approval for) a student's second month, once the
+ * teacher has verified their fees. Body: { studentId, courseId, approved }.
+ */
+export async function PATCH(req: Request) {
+  try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
+    const { studentId, courseId, approved } = await req.json();
+
+    if (
+      typeof studentId !== "string" ||
+      typeof courseId !== "string" ||
+      !studentId ||
+      !courseId ||
+      typeof approved !== "boolean"
+    ) {
+      return NextResponse.json(
+        { message: "studentId, courseId and approved (true/false) are required" },
+        { status: 400 }
+      );
+    }
+
+    const owner = await requireCourseOwner(courseId);
+    if (owner.error) return owner.error;
+
+    await connectDB();
+    const access = await CourseAccessModel.findOneAndUpdate(
+      { studentId, courseId },
+      {
+        $set: {
+          secondMonthApprovedAt: approved ? new Date() : null,
+          secondMonthApprovedBy: approved ? guard.userId : null,
+        },
+      },
+      { new: true }
+    );
+    if (!access) {
+      return NextResponse.json({ message: "Access not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(access);
+  } catch (error) {
+    console.error("[ACCESS_PATCH_ERROR]", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: Request) {
   try {
     const guard = await requireTeacher();

@@ -20,8 +20,6 @@ export interface IChapter extends Document {
   position?: number;
   isCompleted: Map<string, boolean>;
   isPublished: boolean;
-  isFree: boolean;
-  purchased: Map<string, boolean>;
   userProgress: Map<string, boolean>;
   attachments: string[];
   assignments: IChapterAssignment[];
@@ -41,8 +39,6 @@ const chapterSchema = new Schema<IChapter>(
     position: Number,
     isCompleted: { type: Map, of: Boolean, default: {} },
     isPublished: { type: Boolean, default: false },
-    isFree: { type: Boolean, default: false },
-    purchased: { type: Map, of: Boolean, default: {} },
     userProgress: { type: Map, of: Boolean, default: {} },
     attachments: { type: [{ type: String }], default: [] },
     assignments: [

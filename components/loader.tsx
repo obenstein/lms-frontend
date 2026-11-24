@@ -2,7 +2,7 @@
 
 export const Loader = () => {
   return (
-    <div className="h-full w-full flex items-center justify-center">
+    <div className="h-full min-h-[60vh] w-full flex items-center justify-center">
       <div className="flex flex-col items-center gap-y-4">
         {/* Animated Robot/Rocket */}
         <div className="relative">
