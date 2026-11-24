@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAssignmentCourseId, requireCourseAccess } from "@/lib/auth-guards";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import SubmissionModel from "@/lib/models/submission-model";
@@ -9,10 +9,13 @@ import SubmissionModel from "@/lib/models/submission-model";
 
 export async function POST(req: Request, context: { params: Promise<{ assignmentId: string }> }) {
   try {
-    const { userId } = await auth();
-    if (!userId) return new NextResponse("Unauthorized", { status: 401 });
-
     const { assignmentId } = await context.params;
+
+    const courseId = await getAssignmentCourseId(assignmentId);
+    if (!courseId) return new NextResponse("Assignment not found", { status: 404 });
+    const guard = await requireCourseAccess(courseId);
+    if (guard.error) return guard.error;
+    const { userId } = guard;
 
     let fileUrl = "";
 

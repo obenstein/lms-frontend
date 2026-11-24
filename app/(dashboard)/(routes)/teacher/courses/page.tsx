@@ -1,6 +1,6 @@
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
-import { auth } from "@clerk/nextjs/server";
+import { requireTeacherPage } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import axios from "axios";
 import { getAllCourses } from "@/lib/queries";
@@ -10,7 +10,7 @@ import { getAllCourses } from "@/lib/queries";
 const CoursesPage = async () => {
 
 
-    const {userId} = await auth()
+    const userId = await requireTeacherPage();
     if(!userId){
         return redirect("/")
     }

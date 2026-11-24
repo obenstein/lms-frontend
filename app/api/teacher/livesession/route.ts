@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import LiveSessionModel from "@/lib/models/live-session-model";
+import { requireTeacher } from "@/lib/auth-guards";
 
 // Ported from lms-backend/controllers/live-session-controller.js:createSession
 
 export async function POST(req: Request) {
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     const {
       title,
       description,

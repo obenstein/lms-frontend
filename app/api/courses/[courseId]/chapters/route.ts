@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { requireCourseOwner } from "@/lib/auth-guards";
 import { connectDB } from "@/lib/db";
 import ChapterModel from "@/lib/models/chapter-model";
 
@@ -10,13 +10,12 @@ export async function POST(
   context: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Unauthorized access denied", { status: 401 });
-    }
-
     const { courseId } = await context.params;
-    const values = await req.json();
+    const guard = await requireCourseOwner(courseId);
+    if (guard.error) return guard.error;
+    const { userId } = guard;
+
+    const { userId: _u, courseId: _c, _id: _i, ...values } = await req.json();
 
     await connectDB();
     const chapter = await ChapterModel.create({ ...values, courseId, userId });

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Clock, Play, Lock, Radio, Video, Calendar } from "lucide-react";
 import Link from "next/link";
 import { getCourseById, getAllChapters, getLiveSessionsByStudent } from "@/lib/queries";
+import { hasCourseAccess } from "@/lib/auth-guards";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -96,6 +97,10 @@ export default async function CourseOverviewPage({
   const { userId } = await auth();
 
   if (!userId) {
+    return redirect("/");
+  }
+
+  if (!(await hasCourseAccess(userId, courseId))) {
     return redirect("/");
   }
 

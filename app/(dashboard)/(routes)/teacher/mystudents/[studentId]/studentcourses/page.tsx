@@ -1,5 +1,6 @@
 import CourseAccessManager from "../../_components/course-access-manager";
 import { currentUser } from "@clerk/nextjs/server";
+import { requireTeacherPage } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import RevokeAccess from "../../_components/revoke-access";
 import { ArrowLeft, BookOpen, Calendar } from "lucide-react";
@@ -20,6 +21,7 @@ const fetchStudentAccess = async (studentId: string) => {
 };
 
 export default async function StudentCoursesPage({ params }: Props) {
+  await requireTeacherPage();
   const user = await currentUser();
   if (!user) return redirect("/");
   

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import SubmissionModel from "@/lib/models/submission-model";
+import { requireTeacher } from "@/lib/auth-guards";
 
 // Ported from lms-backend/controllers/submission-controller.js:getSubmissionsByStudent
 
@@ -11,6 +12,9 @@ export async function GET(
   const { studentId } = await params;
 
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     if (!studentId) {
       return NextResponse.json({ message: "Missing studentId" }, { status: 400 });
     }

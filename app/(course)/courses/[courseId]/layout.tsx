@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { CourseSidebar } from "./_components/course-sidebar";
 import { CourseNavbar } from "./_components/course-navbar";
 import { getCourseById, getPublishedChapters } from "@/lib/queries";
+import { hasCourseAccess } from "@/lib/auth-guards";
 
 
 interface LayoutProps {
@@ -20,6 +21,9 @@ const CourseLayout = async ({
         return redirect("/")
     }
   const { courseId } = await params;
+  if (!(await hasCourseAccess(userId, courseId))) {
+    return redirect("/");
+  }
  const course = await getCourseById(courseId);
  const chapters = await getPublishedChapters(courseId);
 

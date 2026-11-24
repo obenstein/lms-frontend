@@ -1,10 +1,12 @@
 // File: app/(dashboard)/(routes)/teacher/mystudents/page.tsx
 
 import { currentUser } from "@clerk/nextjs/server";
+import { requireTeacherPage } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import { StudentsTable } from "./_components/students-table";
 import { DataTable } from "../courses/_components/data-table";
 export default async function MyStudentsPage() {
+  await requireTeacherPage();
   const user = await currentUser();
   if (!user) return redirect("/");
 

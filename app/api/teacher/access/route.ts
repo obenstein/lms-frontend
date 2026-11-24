@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import CourseAccessModel from "@/lib/models/course-access-model";
+import { requireCourseOwner, requireTeacher } from "@/lib/auth-guards";
 
 // Ported from lms-backend/controllers/course-access-controller.js (grantAccess, revokeAccess)
 
 export async function POST(req: Request) {
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     const { studentId, courseId, title } = await req.json();
 
     if (!studentId || !courseId) {
@@ -15,7 +19,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Only grant access to a course the teacher actually owns.
+    const owner = await requireCourseOwner(courseId);
+    if (owner.error) return owner.error;
+
     await connectDB();
+    const existing = await CourseAccessModel.findOne({ studentId, courseId });
+    if (existing) return NextResponse.json(existing);
+
     const access = await CourseAccessModel.create({ studentId, courseId, title });
 
     return NextResponse.json(access);
@@ -27,7 +38,16 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const guard = await requireTeacher();
+    if (guard.error) return guard.error;
+
     const { studentId, courseId } = await req.json();
+    if (!studentId || !courseId) {
+      return NextResponse.json(
+        { message: "Missing studentId or courseId" },
+        { status: 400 }
+      );
+    }
 
     await connectDB();
     const result = await CourseAccessModel.findOneAndDelete({ studentId, courseId });

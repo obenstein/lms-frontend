@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
-import { clerkClient, auth } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
+import { requireTeacher } from "@/lib/auth-guards";
+import { isTeacher } from "@/lib/teacher";
 
 export async function GET(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+  const guard = await requireTeacher();
+  if (guard.error) return guard.error;
 
   const client = await clerkClient();
   const { data: users } = await client.users.getUserList({ limit: 100 });
-  const students = users.map(u => ({
+  const students = users.filter((u) => !isTeacher(u.id)).map(u => ({
     id: u.id,
     name: `${u.firstName} ${u.lastName}`,
     email: u.emailAddresses[0]?.emailAddress,
